@@ -1,2 +1,2 @@
 Simpleatcity
-Telegram Bot
+Telegram Bot for Simple Recipes!
