@@ -1,22 +1,24 @@
 import pymysql
+import pandas as pd
 
 # connect to mysql
-conn = pymysql.connect(host='127.0.0.1',
+db = pymysql.connect(host='simpleatcitydb.crbqchzceqdz.ap-southeast-1.rds.amazonaws.com',
                         port=3306,
-                        user='root',
-                        passwd='',
-                        db='simpleatcity',
+                        user='westmoon',
+                        passwd='simpleatcity',
+                        db='simpleatcitydb',
                         charset='utf8')
-curs = conn.cursor()
+curs = db.cursor()
 
 # execute SQL query
-sql = "select * from recipes"
+sql = "SELECT * from recipes"
 curs.execute(sql)
 
 # fetch data
 rows = curs.fetchall()
+
 # all rows
-print(rows)
+print(rows[0])
 
 # close connection
-conn.close()
+db.close()
