@@ -2,10 +2,10 @@ import pymysql
 import pandas as pd
 
 # connect to mysql
-db = pymysql.connect(host='simpleatcitydb.crbqchzceqdz.ap-southeast-1.rds.amazonaws.com',
+db = pymysql.connect(host='moondb.crbqchzceqdz.ap-southeast-1.rds.amazonaws.com',
                         port=3306,
                         user='westmoon',
-                        passwd='simpleatcity',
+                        passwd='surewhynot',
                         db='simpleatcitydb',
                         charset='utf8')
 curs = db.cursor()
