@@ -1,5 +1,6 @@
 import telebot
 import inspect
+from enums import Diet
 from classes import User
 import dbhelper
 
@@ -15,20 +16,19 @@ def send_welcome(message):
         """
         Before I can start recommending simple dishes for you,
         if you want better-tailored dishes, please head on to
-        /fridge and /utensils to fill out the current state of
-        your kitchen and then prompt /recipe. If you want to
+        /myinfo to start your initial setup. If you want to
         get a recipe right away that can be made from several
         main ingredients that you have, head on to /quickrecipe.
         For a better overview of the functionalities that this
-        bot provides, use /help. :>""").replace('\n', ' '))
+        bot provides, use /help.""").replace('\n', ' '))
 
     try:
         chat_id = message.chat.id
         user = User(chat_id)
         # if user does not exist in db, insert new User
 
-        bool = dbhelper.add_user(chat_id)
-        if bool is False:
+        is_new_user = dbhelper.add_user(chat_id)
+        if is_new_user is False:
             bot.reply_to(message, "You already have an account with us! Access /help for further instructions.")
 
     except Exception as e:
@@ -63,6 +63,44 @@ def send_help(message):
 
         *Misc.
         /acceptedingredients - display list of acceptable ingredients"""))
+
+# User prompted to enter basic information
+@bot.message_handler(commands=['myinfo'])
+def send_welcome(message):
+    try:
+        chat_id = message.chat.id
+        diet = dbhelper.get_diet(chat_id)
+
+        if diet == 0:
+            diet = "Vegetarian"
+        elif diet == 1:
+            diet = "Vegan"
+        elif diet == 2: # TODO change these to enums
+            diet = "Non-vegetarian"
+
+        items = dbhelper.get_ingredients(chat_id)
+        utensils = dbhelper.get_utensils(chat_id)
+        likes = dbhelper.get_likes(chat_id)
+        dislikes = dbhelper.get_dislikes(chat_id)
+        num_rated = dbhelper.get_num_rated(chat_id)
+        uploaded = dbhelper.get_recipes_uploaded(chat_id)
+        liked = dbhelper.get_recipes_liked(chat_id)
+
+        msg = bot.reply_to(message,
+            "Dietary Preference: {}\n".format(diet) +
+            "Items in Fridge: {}\n".format(items) +
+            "Utensils: {}\n".format(utensils) +
+            "Likes: {}\n".format(likes) +
+            "Dislikes: {}\n".format(dislikes) +
+            "# of Recipes Rated: {}\n".format(num_rated) +
+            "Recipes Uploaded: {}\n".format(uploaded) +
+            "Recipes Liked: {}\n".format(liked)
+            )
+
+    except Exception as e:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
 
 bot.enable_save_next_step_handlers(delay=2)
 bot.load_next_step_handlers()

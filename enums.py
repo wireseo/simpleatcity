@@ -1,6 +1,6 @@
 import enum
 
-class Category(Enum.enum):
+class Category(enum.Enum):
     FUSION = 0
     WESTERN = 1
     ITALIAN = 2
@@ -13,7 +13,7 @@ class Category(Enum.enum):
     THAI = 9
     INDIAN = 10
 
-class Diet(Enum.enum):
+class Diet(enum.Enum):
     VEG = 0
     VEGAN = 1
     NON = 2
