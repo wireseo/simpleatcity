@@ -4,14 +4,12 @@ class Category(enum.Enum):
     FUSION = 0
     WESTERN = 1
     ITALIAN = 2
-    SPANISH = 3
-    MEXICAN = 4
-    ASIAN = 5
-    KOREAN = 6
-    CHINESE = 7
-    JAPANESE = 8
-    THAI = 9
-    INDIAN = 10
+    MEXICAN = 3
+    ASIAN = 4
+    KOREAN = 5
+    JAPANESE = 6
+    THAI = 7
+    INDIAN = 8
 
 class Diet(enum.Enum):
     VEG = 0

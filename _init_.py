@@ -8,7 +8,6 @@ TOKEN = "1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0"
 
 bot = telebot.TeleBot(TOKEN)
 
-
 # User prompted to enter basic information
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -61,7 +60,7 @@ def send_help(message):
         /utensils - maintain currently available utensils
         /preferences - maintain current culinary preferences
 
-        *Misc.
+        *Miscellaneous
         /acceptedingredients - display list of acceptable ingredients"""))
 
 # User prompted to enter basic information
@@ -102,9 +101,25 @@ def send_welcome(message):
         message = template.format(type(e).__name__, e.args)
         print(message)
 
+# User prompted to manually enter available ingredients
+@bot.message_handler(commands=['quickrecipe'])
+def ask_ingredients(message):
+    ingredients = bot.reply_to(message, inspect.cleandoc("""
+        Please enter the available ingredients.
+
+        Use singular form for ingredients and seperate with commas.
+        ex) tomato, egg"""))
+    bot.register_next_step_handler(ingredients, send_quickrecipe)
+
+# Suggest recipe to the users
+def send_quickrecipe(ingredients):
+    recipe = dbhelper.get_quickrecipe(ingredients.text)
+    bot.reply_to(ingredients, recipe)
+
 bot.enable_save_next_step_handlers(delay=2)
 bot.load_next_step_handlers()
 
+#commented out due to InterfaceError
 #dbhelper.close_db()
 
 bot.polling()
