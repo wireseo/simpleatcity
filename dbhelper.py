@@ -1,6 +1,7 @@
 import pymysql
 from pymysql import IntegrityError
 import pandas as pd
+import random
 
 db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.amazonaws.com',
                         port=3306,
@@ -9,37 +10,71 @@ db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.am
                         db='simpleatcitydb',
                         charset='utf8')
 
-
 # get recipe by ingredients
-def get_quickrecipe(ing_list):
+def get_quickrecipe(ing_name_str):
     try:
+        print('These are the inputs : {}'.format(ing_name_str))
         curs = db.cursor()
-        # execute SQL query
+        # convert string of ing_name_str to a list
+        ing_name_list = [x.replace(' ', '') for x in ing_name_str.split(',')]
+        print('Below are the elements of the ing_name_list')
+        for a in ing_name_list:
+                print(a)
+        # convert individual ing_name to ing_id_
+        ing_id_list = [ing_name_to_id(e) for e in ing_name_list]
+        print('Below are the elements of the ing_id_list')
+        for b in ing_id_list:
+            print(b)
+        # concatenate list of ing_id_list into a string
+        ing_id_str = ','.join(map(str, ing_id_list))
+        print('This is the concatenated string of ing_id : {}'.format(ing_id_str))
         sql = """
             SELECT DISTINCT
-                r.rec_name
+                r.instructions
             FROM
                 recipes AS r
             JOIN main_ingredients AS mi ON r.rec_id = mi.rec_id
             JOIN ingredients AS i ON mi.ing_id = i.ing_id
             LEFT JOIN main_ingredients AS noIng ON r.rec_id = noIng.rec_id
-                AND noIng.ing_id NOT IN (1,2,3)
-            WHERE i.ing_id IN (1,2,3)
-                AND noIng.id IS NULL;"""
-        sql_2 = "SELECT * FROM recipes WHERE rec_id = 1"
+                AND noIng.ing_id NOT IN ({})
+            WHERE i.ing_id IN ({})
+                AND noIng.id IS NULL;""".format(ing_id_str, ing_id_str)
+        # execute SQL query
         curs.execute(sql)
         rows = curs.fetchall()
-
+        # if no recipe exist
         if len(rows) == 0:
             return 'No recipe found :('
         else:
-            return ''.join(str(x) for x in rows)
+            return get_random(rows)
 
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        template = "An exception of type {0} occurred while retrieving quickrecipe suggestion. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
-        return 'Sorry, an unexpected error has occured.\n Please try again :('
+        return 'Sorry, an unexpected error has occured. Please try again :('
+
+def get_random(input):
+    r = random.randint(0, len(input) - 1)
+    return ''.join(str(input[r]))
+
+def ing_name_to_id(ing_name_):
+    try:
+        curs = db.cursor()
+        sql = """
+        SELECT * FROM ingredients
+        WHERE ing_name_1 = '{}'
+            OR ing_name_2 = '{}'
+            OR ing_name_3 = '{}'""".format(ing_name_, ing_name_, ing_name_)
+        # execute SQL query
+        curs.execute(sql)
+        ing_row = curs.fetchone()
+        # return first column 'ing_id'
+        return ing_row[0]
+    except Exception as e:
+        template = "An exception of type {0} occurred while converting ingredient name to id. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
 
 def display_recipe():
     try:
