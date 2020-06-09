@@ -4,11 +4,10 @@ from enums import Diet
 from classes import User
 import dbhelper
 
-TOKEN = "1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0"
+bot = telebot.TeleBot("1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0")
 
-bot = telebot.TeleBot(TOKEN)
+user_list = []
 
-# User prompted to enter basic information
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     msg = bot.reply_to(message, 'Welcome to Simpleatcity!\n\n' + inspect.cleandoc(
@@ -20,7 +19,9 @@ def send_welcome(message):
         main ingredients that you have, head on to /quickrecipe.
         For a better overview of the functionalities that this
         bot provides, use /help.""").replace('\n', ' '))
-
+    # getMe
+    user_list.append(User())
+    user = tb.get_me()
     try:
         chat_id = message.chat.id
         user = User(chat_id)
@@ -122,4 +123,7 @@ bot.load_next_step_handlers()
 #commented out due to InterfaceError
 #dbhelper.close_db()
 
+  
 bot.polling()
+
+#cool
