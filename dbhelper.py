@@ -13,21 +13,21 @@ db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.am
 # get recipe by ingredients
 def get_quickrecipe(ing_name_str):
     try:
-        print('These are the inputs : {}'.format(ing_name_str))
+        ## print('These are the inputs : {}'.format(ing_name_str))
         curs = db.cursor()
-        # convert string of ing_name_str to a list
+        # split ingredients_name to a list of ingredients_name
         ing_name_list = [x.replace(' ', '') for x in ing_name_str.split(',')]
-        print('Below are the elements of the ing_name_list')
-        for a in ing_name_list:
-                print(a)
-        # convert individual ing_name to ing_id_
+        ## print('Below are the elements of the ing_name_list')
+        ## for a in ing_name_list:
+        ##        print(a)
+        # convert ingredients_name to ingredients_id
         ing_id_list = [ing_name_to_id(e) for e in ing_name_list]
-        print('Below are the elements of the ing_id_list')
-        for b in ing_id_list:
-            print(b)
-        # concatenate list of ing_id_list into a string
+        ## print('Below are the elements of the ing_id_list')
+        ## for b in ing_id_list:
+        ##    print(b)
+        # concatenate list of ingredients_id into a string
         ing_id_str = ','.join(map(str, ing_id_list))
-        print('This is the concatenated string of ing_id : {}'.format(ing_id_str))
+        ## print('This is the concatenated string of ing_id : {}'.format(ing_id_str))
         sql = """
             SELECT DISTINCT
                 r.instructions
@@ -42,14 +42,15 @@ def get_quickrecipe(ing_name_str):
         # execute SQL query
         curs.execute(sql)
         rows = curs.fetchall()
-        # if no recipe exist
+        # if no recipe exists
         if len(rows) == 0:
             return 'No recipe found :('
         else:
             return get_random(rows)
-
     except Exception as e:
-        template = "An exception of type {0} occurred while retrieving quickrecipe suggestion. Arguments:\n{1!r}"
+        template = """
+        An exception of type {0} occurred while retrieving quickrecipe suggestion.
+        Arguments:\n{1!r}"""
         message = template.format(type(e).__name__, e.args)
         print(message)
         return 'Sorry, an unexpected error has occured. Please try again :('
@@ -72,7 +73,9 @@ def ing_name_to_id(ing_name_):
         # return first column 'ing_id'
         return ing_row[0]
     except Exception as e:
-        template = "An exception of type {0} occurred while converting ingredient name to id. Arguments:\n{1!r}"
+        template = """
+        An exception of type {0} occurred while converting ingredient name to id.
+        Arguments:\n{1!r}"""
         message = template.format(type(e).__name__, e.args)
         print(message)
 
