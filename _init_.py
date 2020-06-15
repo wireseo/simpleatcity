@@ -19,14 +19,15 @@ def send_welcome(message):
         main ingredients that you have, head on to /quickrecipe.
         For a better overview of the functionalities that this
         bot provides, use /help.""").replace('\n', ' '))
-    # getMe
-    user_list.append(User())
-    user = tb.get_me()
+    # getMe -- hmm where is this needed
+    #user_list.append(User())
+    #user = tb.get_me()
+
     try:
         chat_id = message.chat.id
         user = User(chat_id)
-        # if user does not exist in db, insert new User
 
+        # if user does not exist in db, insert new User
         is_new_user = dbhelper.add_user(chat_id)
         if is_new_user is False:
             bot.reply_to(message, "You already have an account with us! Access /help for further instructions.")
@@ -66,9 +67,11 @@ def send_help(message):
 
 # User prompted to enter basic information
 @bot.message_handler(commands=['myinfo'])
-def send_welcome(message):
+def send_myinfo(message):
+    chat_id = message.chat.id
+
     try:
-        chat_id = message.chat.id
+        #chat_id = message.chat.id
         diet = dbhelper.get_diet(chat_id)
 
         if diet == 0:
@@ -97,10 +100,20 @@ def send_welcome(message):
             "Recipes Liked: {}\n".format(liked)
             )
 
+        #bot.register_next_step_handler(msg, access_recipes)
+
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
+
+def access_recipes(msg):
+    if msg[0] == "u":
+        recipes_uploaded = dbhelper.get_recipes_uploaded() # How to pass this from previous step?
+    elif msg[0] == "l":
+        recipes_liked = dbhelper.get_recipes_liked() # How to pass this from previous step?
+    else:
+        warning = bot.reply_to(msg, "Please check your input.")
 
 # User prompted to manually enter available ingredients
 @bot.message_handler(commands=['quickrecipe'])
@@ -123,7 +136,7 @@ bot.load_next_step_handlers()
 #commented out due to InterfaceError
 #dbhelper.close_db()
 
-  
+
 bot.polling()
 
 #cool

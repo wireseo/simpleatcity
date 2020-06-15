@@ -33,7 +33,7 @@ def get_quickrecipe(ing_name_str):
                 r.instructions
             FROM
                 recipes AS r
-            JOIN main_ingredients AS mi ON r.rec_id = mi.rec_id
+            JOIN ingredients_main AS mi ON r.rec_id = mi.rec_id
             JOIN ingredients AS i ON mi.ing_id = i.ing_id
             LEFT JOIN main_ingredients AS noIng ON r.rec_id = noIng.rec_id
                 AND noIng.ing_id NOT IN ({})
@@ -118,7 +118,7 @@ def add_user(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "INSERT INTO users (id) VALUES (" + str(chat_id) + ")"
+        sql = "INSERT INTO users (user_id) VALUES (" + str(chat_id) + ")"
         curs.execute(sql)
 
         # commit
@@ -137,7 +137,7 @@ def get_diet(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (diet) FROM users WHERE (id) = '" + str(chat_id) + "'"
+        sql = "SELECT (diet) FROM users WHERE (user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
@@ -156,14 +156,16 @@ def get_ingredients(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (ingredients) FROM users WHERE (id) = '" + str(chat_id) + "'"
+        sql = "SELECT (ing_name_1) FROM users_ingredients A JOIN ingredients B ON A.ing_id = B.ing_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
-        data = curs.fetchone()
-        if data == None:
-            print("Nope")
-        return data[0]
+        data = curs.fetchall()
+        if not data:
+            print("Nope - ingredients " + str(data))
+        else:
+            data = ', '.join([i for tup in data for i in tup])
+            return data
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
@@ -175,14 +177,16 @@ def get_utensils(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (utensils) FROM users WHERE (id) = '" + str(chat_id) + "'"
+        sql = "SELECT (B.name) FROM users_utensils A JOIN utensils B ON A.uten_id = B.id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
-        data = curs.fetchone()
-        if data == None:
-            print("Nope")
-        return data[0]
+        data = curs.fetchall()
+        if not data:
+            print("Nope - utensils" + str(data))
+        else:
+            data = ', '.join([i for tup in data for i in tup])
+            return data
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
@@ -194,14 +198,16 @@ def get_likes(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (likes) FROM users WHERE (id) = '" + str(chat_id) + "'"
+        sql = "SELECT (B.name) FROM users_likes A JOIN categories B ON A.cat_id = B.id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
-        data = curs.fetchone()
-        if data == None:
-            print("Nope")
-        return data[0]
+        data = curs.fetchall()
+        if not data:
+            print("Nope - likes" + str(data))
+        else:
+            data = ', '.join([i for tup in data for i in tup])
+            return data
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
@@ -213,14 +219,16 @@ def get_dislikes(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (dislikes) FROM users WHERE (id) = '" + str(chat_id) + "'"
+        sql = "SELECT (B.name) FROM users_dislikes A JOIN categories B ON A.cat_id = B.id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
-        data = curs.fetchone()
-        if data == None:
-            print("Nope")
-        return data[0]
+        data = curs.fetchall()
+        if not data:
+            print("Nope - dislikes" + str(data))
+        else:
+            data = ', '.join([i for tup in data for i in tup])
+            return data
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
@@ -232,13 +240,13 @@ def get_num_rated(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (num_rated) FROM users WHERE (id) = '" + str(chat_id) + "'"
+        sql = "SELECT (num_rated) FROM users WHERE (user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
         data = curs.fetchone()
         if data == None:
-            print("Nope")
+            print("Nope - num rated")
         return data[0]
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
@@ -251,14 +259,16 @@ def get_recipes_uploaded(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (recipes_uploaded) FROM users WHERE (id) = '" + str(chat_id) + "'"
+        sql = "SELECT (B.rec_name) FROM users_uploaded A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
-        data = curs.fetchone()
-        if data == None:
-            print("Nope")
-        return data[0]
+        data = curs.fetchall()
+        if not data:
+            print("Nope - recipes uploaded" + str(data))
+        else:
+            data = ', '.join([i for tup in data for i in tup])
+            return data
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
@@ -270,14 +280,16 @@ def get_recipes_liked(chat_id):
             curs = db.cursor()
 
             # execute SQL query
-            sql = "SELECT (recipes_liked) FROM users WHERE (id) = '" + str(chat_id) + "'"
+            sql = "SELECT (B.rec_name) FROM users_liked A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
             curs.execute(sql)
 
             # fetch data
-            data = curs.fetchone()
-            if data == None:
-                print("Nope")
-            return data[0]
+            data = curs.fetchall()
+            if not data:
+                print("Nope - recipes liked" + str(data))
+            else:
+                data = ', '.join([i for tup in data for i in tup])
+                return data
         except Exception as e:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(e).__name__, e.args)
