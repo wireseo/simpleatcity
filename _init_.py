@@ -17,7 +17,7 @@ def send_welcome(message):
         /myinfo to start your initial setup. If you want to
         get a recipe right away that can be made from several
         main ingredients that you have, head on to /quickrecipe.
-        For a better overview of the functionalities that this
+        For a more detailed overview of the functionalities that this
         bot provides, use /help.""").replace('\n', ' '))
     # getMe -- hmm where is this needed
     #user_list.append(User())
@@ -44,26 +44,27 @@ def send_help(message):
     bot.reply_to(message, inspect.cleandoc("""
         Welcome to Simpleatcity!
 
-        You can control me by sending these commands:
+        You can control me with the following commands:
 
-        *Set Up
+        \U0001F511 Set Up
         /start - set up user information
         /help - display a detailed manual
 
-        *Recipes
+        \U0001F374 Recipes
         /recipe - suggest recipe based on current user information
         /quickrecipe - suggest recipe based on user input
         /upload - upload new recipes
 
-        *User Information
-        /myinfo - display overall summary of user information and access uploaded / liked recipes
+        \U00002139 User Information
+        /myinfo - display overall summary of user information
         /diet - maintain current dietary status
         /ingredients - maintain currently available ingredients
         /utensils - maintain currently available utensils
         /preferences - maintain current culinary preferences
 
-        *Miscellaneous
+        \U0001F4DC Miscellaneous
         /acceptedingredients - display list of acceptable ingredients"""))
+
 
 # User prompted to enter basic information
 @bot.message_handler(commands=['myinfo'])
@@ -115,7 +116,8 @@ def access_recipes(msg):
     else:
         warning = bot.reply_to(msg, "Please check your input.")
 
-# User prompted to manually enter available ingredients
+
+# user prompted to manually enter available ingredients
 @bot.message_handler(commands=['quickrecipe'])
 def ask_ingredients(message):
     ingredients = bot.reply_to(message, inspect.cleandoc("""
@@ -125,7 +127,16 @@ def ask_ingredients(message):
         ex) tomato, egg"""))
     bot.register_next_step_handler(ingredients, send_quickrecipe)
 
-# Suggest recipe to the users
+
+# user given recipe based on user information
+@bot.message_handler(commands=['recipe'])
+def ask_ingredients(message):
+    user = message.chat.id
+    recipe = dbhelper.get_recipe(user)
+    bot.reply_to(message, recipe)
+
+
+# suggest recipe based on given ingredients
 def send_quickrecipe(ingredients):
     recipe = dbhelper.get_quickrecipe(ingredients.text)
     bot.reply_to(ingredients, recipe)
@@ -138,5 +149,3 @@ bot.load_next_step_handlers()
 
 
 bot.polling()
-
-#cool
