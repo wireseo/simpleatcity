@@ -10,7 +10,8 @@ db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.am
                         db='simpleatcitydb',
                         charset='utf8')
 
-# get recipe by ingredients
+
+# get recipe based on ingredient input
 def get_quickrecipe(ing_name_str):
     try:
         ## print('These are the inputs : {}'.format(ing_name_str))
@@ -33,9 +34,9 @@ def get_quickrecipe(ing_name_str):
                 r.instructions
             FROM
                 recipes AS r
-            JOIN ingredients_main AS mi ON r.rec_id = mi.rec_id
+            JOIN recipes_main AS mi ON r.rec_id = mi.rec_id
             JOIN ingredients AS i ON mi.ing_id = i.ing_id
-            LEFT JOIN main_ingredients AS noIng ON r.rec_id = noIng.rec_id
+            LEFT JOIN recipes_main AS noIng ON r.rec_id = noIng.rec_id
                 AND noIng.ing_id NOT IN ({})
             WHERE i.ing_id IN ({})
                 AND noIng.id IS NULL;""".format(ing_id_str, ing_id_str)
@@ -55,10 +56,53 @@ def get_quickrecipe(ing_name_str):
         print(message)
         return 'Sorry, an unexpected error has occured. Please try again :('
 
+
+# get recipe based on user information
+def get_recipe(user):
+    try:
+        diet = get_diet(user)
+        ingredients = get_ingredients_from_user(user)
+        utensils = get_utensils(user)
+        ## print('These are the inputs : {}'.format(ing_name_str))
+        curs = db.cursor()
+        # concatenate list of ingredients_id into a string
+        ing_id_str = ','.join(map(str, ingredients))
+        ## print('This is the concatenated string of ing_id : {}'.format(ing_id_str))
+        sql = """
+            SELECT DISTINCT
+                r.instructions
+            FROM
+                recipes AS r
+            JOIN recipes_main AS mi ON r.rec_id = mi.rec_id
+            JOIN ingredients AS i ON mi.ing_id = i.ing_id
+            LEFT JOIN recipes_main AS noIng ON r.rec_id = noIng.rec_id
+                AND noIng.ing_id NOT IN ({})
+            WHERE i.ing_id IN ({})
+                AND noIng.id IS NULL;""".format(ing_id_str, ing_id_str)
+        # execute SQL query
+        curs.execute(sql)
+        rows = curs.fetchall()
+        # if no recipe exists
+        if len(rows) == 0:
+            return 'No recipe found :('
+        else:
+            return get_random(rows)
+    except Exception as e:
+        template = """
+        An exception of type {0} occurred while retrieving recipe suggestion.
+        Arguments:\n{1!r}"""
+        message = template.format(type(e).__name__, e.args)
+        print(message)
+        return 'Sorry, an unexpected error has occured. Please try again :('
+
+
+# retrieve random element from input list
 def get_random(input):
     r = random.randint(0, len(input) - 1)
-    return ''.join(str(input[r]))
+    return str(input[r][0])
 
+
+# convert ingredient name to ingredient id
 def ing_name_to_id(ing_name_):
     try:
         curs = db.cursor()
@@ -168,6 +212,22 @@ def get_ingredients(chat_id):
             return data
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
+
+
+# retrieve a list of ingredient_id that the user possesses
+def get_ingredients_from_user(user):
+    try:
+        curs = db.cursor()
+        # execute SQL query
+        sql = "SELECT ing_id FROM users a JOIN users_ingredients b ON a.id = b.user_id WHERE a.user_id = {}".format(user)
+        curs.execute(sql)
+        # fetch data
+        data = curs.fetchall()
+        return [x[0] for x in data]
+    except Exception as e:
+        template = "An exception of type {0} occurred while retrieving ingredients from user. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
 
