@@ -42,12 +42,12 @@ def get_quickrecipe(ing_name_str):
                 AND noIng.id IS NULL;""".format(ing_id_str, ing_id_str)
         # execute SQL query
         curs.execute(sql)
-        rows = curs.fetchall()
+        final_quickrec = curs.fetchall()
         # if no recipe exists
-        if len(rows) == 0:
+        if len(final_quickrec) == 0:
             return 'No recipe found :('
         else:
-            return get_random(rows)
+            return get_random(final_quickrec)
     except Exception as e:
         template = """
         An exception of type {0} occurred while retrieving quickrecipe suggestion.
@@ -60,17 +60,15 @@ def get_quickrecipe(ing_name_str):
 # get recipe based on user information
 def get_recipe(user):
     try:
-        diet = get_diet(user)
+        # retrieve list of user's ingredients
         ingredients = get_ingredients_from_user(user)
-        utensils = get_utensils(user)
-        ## print('These are the inputs : {}'.format(ing_name_str))
-        curs = db.cursor()
-        # concatenate list of ingredients_id into a string
+        # concatenate list of ingredients id into a string
         ing_id_str = ','.join(map(str, ingredients))
-        ## print('This is the concatenated string of ing_id : {}'.format(ing_id_str))
+        # find all available recipes based on ingredients
+        curs = db.cursor()
         sql = """
             SELECT DISTINCT
-                r.instructions
+                r.rec_id
             FROM
                 recipes AS r
             JOIN recipes_main AS mi ON r.rec_id = mi.rec_id
@@ -79,14 +77,56 @@ def get_recipe(user):
                 AND noIng.ing_id NOT IN ({})
             WHERE i.ing_id IN ({})
                 AND noIng.id IS NULL;""".format(ing_id_str, ing_id_str)
-        # execute SQL query
         curs.execute(sql)
-        rows = curs.fetchall()
+        rec_by_ing = curs.fetchall()
         # if no recipe exists
-        if len(rows) == 0:
+        if len(rec_by_ing) == 0:
+            return 'No recipe found :('
+        rec_by_ing_str = query_result_to_str(rec_by_ing)
+
+        # retrieve list of user's utensils
+        utensils = get_utensils_from_user(user)
+        # concatenate list of utensils id into a string
+        ute_id_str = ','.join(map(str, utensils))
+        # find all available recipes based on utensils
+        curs = db.cursor()
+        sql = """
+        SELECT DISTINCT
+            r.rec_id
+        FROM
+            recipes AS r
+        JOIN recipes_utensils AS ru ON r.rec_id = ru.rec_id
+        JOIN utensils AS u ON ru.uten_id = u.id
+        LEFT JOIN recipes_utensils AS noUte ON r.rec_id = noUte.rec_id
+            AND noUte.uten_id NOT IN ({})
+        WHERE u.id IN ({})
+            AND noUte.id IS NULL;""".format(ute_id_str, ute_id_str)
+        curs.execute(sql)
+        rec_by_ute = curs.fetchall()
+        # if no recipe exists
+        if len(rec_by_ing) == 0:
+            return 'No recipe found :('
+        rec_by_ute_str = query_result_to_str(rec_by_ute)
+
+        # retrieve user's diet
+        diet = get_diet_from_user(user)
+        # convert diet_id to a string
+        diet_id_str = str(diet[0])
+        # find all available recipes based on ingreidents, utensils, and diet
+        curs = db.cursor()
+        sql = """
+        SELECT r.instructions FROM recipes r
+            WHERE diet = {}
+                AND rec_id IN ({})
+                AND rec_id IN ({});
+        """.format(diet_id_str, rec_by_ing_str, rec_by_ute_str)
+        curs.execute(sql)
+        final_rec = curs.fetchall()
+        # if no recipe exists
+        if len(final_rec) == 0:
             return 'No recipe found :('
         else:
-            return get_random(rows)
+            return get_random(final_rec)
     except Exception as e:
         template = """
         An exception of type {0} occurred while retrieving recipe suggestion.
@@ -110,7 +150,10 @@ def ing_name_to_id(ing_name_):
         SELECT * FROM ingredients
         WHERE ing_name_1 = '{}'
             OR ing_name_2 = '{}'
-            OR ing_name_3 = '{}'""".format(ing_name_, ing_name_, ing_name_)
+            OR ing_name_3 = '{}'
+            OR ing_name_4 = '{}'
+            OR ing_name_5 = '{}'
+        """.format(ing_name_, ing_name_, ing_name_, ing_name_, ing_name_)
         # execute SQL query
         curs.execute(sql)
         ing_row = curs.fetchone()
@@ -195,6 +238,22 @@ def get_diet(chat_id):
         print(message)
 
 
+# retrieve user's diet from user information
+def get_diet_from_user(user):
+    try:
+        curs = db.cursor()
+        # execute SQL query
+        sql = "SELECT diet FROM users WHERE user_id = {}".format(user)
+        curs.execute(sql)
+        # fetch data
+        data = curs.fetchall()
+        return [x[0] for x in data]
+    except Exception as e:
+        template = "An exception of type {0} occurred while retrieving diet from user. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
+
+
 def get_ingredients(chat_id):
     try:
         curs = db.cursor()
@@ -216,7 +275,7 @@ def get_ingredients(chat_id):
         print(message)
 
 
-# retrieve a list of ingredient_id that the user possesses
+# retrieve a list of ingredient_id from user information
 def get_ingredients_from_user(user):
     try:
         curs = db.cursor()
@@ -249,6 +308,22 @@ def get_utensils(chat_id):
             return data
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
+
+
+# retrieve user's utensils from user information
+def get_utensils_from_user(user):
+    try:
+        curs = db.cursor()
+        # execute SQL query
+        sql = "SELECT uten_id FROM users a JOIN users_utensils b ON a.id = b.user_id WHERE a.user_id = {}".format(user)
+        curs.execute(sql)
+        # fetch data
+        data = curs.fetchall()
+        return [x[0] for x in data]
+    except Exception as e:
+        template = "An exception of type {0} occurred while retrieving utensils from user. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
 
@@ -354,6 +429,12 @@ def get_recipes_liked(chat_id):
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(e).__name__, e.args)
             print(message)
+
+
+# convert query results(list of tuples) to a string
+def query_result_to_str(list):
+    flat_list = [str(x[0]) for x in list]
+    return ','.join(map(str, flat_list))
 
 
 def close_db():
