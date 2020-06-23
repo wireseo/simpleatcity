@@ -71,7 +71,8 @@ def send_help(message):
 def send_rec_by_rec_id(message):
     bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
 
-# Handles the case where only recipe id is entered
+
+# Handles the case where diet is to be changed
 @bot.message_handler(regexp="veg|vegan|nonveg")
 def change_to_veg(message):
     chat_id = message.chat.id
@@ -89,6 +90,7 @@ def change_to_veg(message):
     if diet != -1:
         dbhelper.change_diet_status(chat_id, diet)
         bot.reply_to(message, "Dietary status updated to " + message.text + ".")
+
 
 # User prompted to enter & view basic information
 @bot.message_handler(commands=['myinfo'])
@@ -129,9 +131,9 @@ def send_myinfo(message):
 
 
 # User can view and change diet
-@bot.message_handler(commands=['diet'])
-def send_diet(message):
-    chat_id = message.chat.id
+@bot.message_handler(commands=['acceptedingredients'])
+def send_accepted_ingredients(message):
+    msg = bot.reply_to(message, dbhelper.get_all_ingredients())
 
 
 # user prompted to manually enter available ingredients

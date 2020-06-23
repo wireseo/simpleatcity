@@ -446,6 +446,7 @@ def get_recipes_liked(chat_id):
         message = template.format(type(e).__name__, e.args)
         print(message)
 
+
 def change_diet_status(chat_id, diet):
     try:
         curs = db.cursor()
@@ -457,6 +458,7 @@ def change_diet_status(chat_id, diet):
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
+
 
 def get_recipe_with_id(rid):
     try:
@@ -472,11 +474,35 @@ def get_recipe_with_id(rid):
             print("Nope - recipes with id" + str(data))
             return "There are no recipes with this id."
         else:
-            #newdata = []
-            #for i, (name, instructions) in enumerate(data):
-            #    newdata.append((str(name) + "\n\n" + str(instructions)))
-            #return newdata
             return data[0] + "\n\n" + data[1]
+    except Exception as e:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
+
+
+def get_all_ingredients():
+    try:
+        curs = db.cursor()
+
+        # execute SQL query
+        sql = "SELECT ing_name_1, ing_name_2, ing_name_3, ing_name_4, ing_name_5 FROM ingredients"
+        curs.execute(sql)
+
+        # fetch data
+        data = curs.fetchall()
+        if not data:
+            print("Nope - get all ingredients" + str(data))
+            return "There are no ingredients in the db. Please contact the administrator."
+        else:
+            newdata = []
+            for tup in data:
+                print(tup)
+                newdata.append(' | '.join(filter(None, tup)))
+                print(newdata)
+            str = '\n'.join(newdata)
+            return str
+
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
