@@ -65,23 +65,19 @@ def send_help(message):
         \U0001F4DC Miscellaneous
         /acceptedingredients - display list of acceptable ingredients"""))
 
+# Handles the case where only recipe id is entered
+@bot.message_handler(regexp="\d+")
+def send_rec_by_rec_id(message):
+    bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
 
-# User prompted to enter basic information
+
+# User prompted to enter & view basic information
 @bot.message_handler(commands=['myinfo'])
 def send_myinfo(message):
     chat_id = message.chat.id
 
     try:
-        #chat_id = message.chat.id
         diet = dbhelper.get_diet(chat_id)
-
-        if diet == 0:
-            diet = "Vegetarian"
-        elif diet == 1:
-            diet = "Vegan"
-        elif diet == 2: # TODO change these to enums
-            diet = "Non-vegetarian"
-
         items = dbhelper.get_ingredients(chat_id)
         utensils = dbhelper.get_utensils(chat_id)
         likes = dbhelper.get_likes(chat_id)
@@ -91,30 +87,21 @@ def send_myinfo(message):
         liked = dbhelper.get_recipes_liked(chat_id)
 
         msg = bot.reply_to(message,
-            "Dietary Preference: {}\n".format(diet) +
-            "Items in Fridge: {}\n".format(items) +
-            "Utensils: {}\n".format(utensils) +
-            "Likes: {}\n".format(likes) +
-            "Dislikes: {}\n".format(dislikes) +
-            "# of Recipes Rated: {}\n".format(num_rated) +
-            "Recipes Uploaded: {}\n".format(uploaded) +
-            "Recipes Liked: {}\n".format(liked)
-            )
-
-        #bot.register_next_step_handler(msg, access_recipes)
+            "*Dietary Preference:* {}\n\n".format(diet) +
+            "*Items in Fridge:* \n{}\n\n".format(items) +
+            "*Utensils:* \n{}\n\n".format(utensils) +
+            "*Likes:* \n{}\n\n".format(likes) +
+            "*Dislikes:* \n{}\n\n".format(dislikes) +
+            "*# of Recipes Rated:* {}\n\n".format(num_rated) +
+            "*Recipes Uploaded:* \n\t\t{}\n\n".format(uploaded) +
+            "*Recipes Liked:* \n\t\t{}\n".format(liked) +
+            "\nTo access the recipes above, type in the recipe id (i.e. number displayed before recipe name). You can only prompt for one recipe at a time."
+            , parse_mode='Markdown')
 
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
-
-def access_recipes(msg):
-    if msg[0] == "u":
-        recipes_uploaded = dbhelper.get_recipes_uploaded() # How to pass this from previous step?
-    elif msg[0] == "l":
-        recipes_liked = dbhelper.get_recipes_liked() # How to pass this from previous step?
-    else:
-        warning = bot.reply_to(msg, "Please check your input.")
 
 
 # user prompted to manually enter available ingredients

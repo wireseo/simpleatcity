@@ -231,7 +231,17 @@ def get_diet(chat_id):
         data = curs.fetchone()
         if data == None:
             print("Nope")
-        return data[0]
+
+        diet = data[0]
+
+        if diet == 0:
+            diet = "Vegetarian"
+        elif diet == 1:
+            diet = "Vegan"
+        elif diet == 2:
+            diet = "Non-vegetarian"
+
+        return diet
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
@@ -394,7 +404,7 @@ def get_recipes_uploaded(chat_id):
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT (B.rec_name) FROM users_uploaded A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
+        sql = "SELECT B.rec_name, B.rec_id FROM users_uploaded A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
 
         # fetch data
@@ -402,8 +412,11 @@ def get_recipes_uploaded(chat_id):
         if not data:
             print("Nope - recipes uploaded" + str(data))
         else:
-            data = ', '.join([i for tup in data for i in tup])
-            return data
+            newdata = []
+            for i, (name, id) in enumerate(data):
+                newdata.append((str(id) + ". " + str(name)))
+            newdata = '\n\t\t'.join(newdata)
+            return newdata
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
@@ -411,25 +424,52 @@ def get_recipes_uploaded(chat_id):
 
 
 def get_recipes_liked(chat_id):
-        try:
-            curs = db.cursor()
+    try:
+        curs = db.cursor()
 
-            # execute SQL query
-            sql = "SELECT (B.rec_name) FROM users_liked A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
-            curs.execute(sql)
+        # execute SQL query
+        sql = "SELECT B.rec_name, B.rec_id FROM users_liked A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
+        curs.execute(sql)
 
-            # fetch data
-            data = curs.fetchall()
-            if not data:
-                print("Nope - recipes liked" + str(data))
-            else:
-                data = ', '.join([i for tup in data for i in tup])
-                return data
-        except Exception as e:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(e).__name__, e.args)
-            print(message)
+        # fetch data
+        data = curs.fetchall()
+        if not data:
+            print("Nope - recipes liked" + str(data))
+        else:
+            newdata = []
+            for i, (name, id) in enumerate(data):
+                newdata.append((str(id) + ". " + str(name)))
+            newdata = '\n\t\t'.join(newdata)
+            return newdata
+    except Exception as e:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
 
+
+def get_recipe_with_id(rid):
+    try:
+        curs = db.cursor()
+
+        # execute SQL query
+        sql = "SELECT rec_name, instructions FROM recipes WHERE (recipes.rec_id) = '" + str(rid) + "'"
+        curs.execute(sql)
+
+        # fetch data
+        data = curs.fetchone()
+        if not data:
+            print("Nope - recipes with id" + str(data))
+            return "There are no recipes with this id."
+        else:
+            #newdata = []
+            #for i, (name, instructions) in enumerate(data):
+            #    newdata.append((str(name) + "\n\n" + str(instructions)))
+            #return newdata
+            return data[0] + "\n\n" + data[1]
+    except Exception as e:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
 
 # convert query results(list of tuples) to a string
 def query_result_to_str(list):
