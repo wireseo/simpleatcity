@@ -446,6 +446,17 @@ def get_recipes_liked(chat_id):
         message = template.format(type(e).__name__, e.args)
         print(message)
 
+def change_diet_status(chat_id, diet):
+    try:
+        curs = db.cursor()
+
+        # execute SQL query
+        sql = "UPDATE users SET diet = '" + str(diet) + "' WHERE (user_id) = '" + str(chat_id) + "'"
+        curs.execute(sql)
+    except Exception as e:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
 
 def get_recipe_with_id(rid):
     try:

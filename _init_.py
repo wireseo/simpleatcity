@@ -65,11 +65,30 @@ def send_help(message):
         \U0001F4DC Miscellaneous
         /acceptedingredients - display list of acceptable ingredients"""))
 
+
 # Handles the case where only recipe id is entered
 @bot.message_handler(regexp="\d+")
 def send_rec_by_rec_id(message):
     bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
 
+# Handles the case where only recipe id is entered
+@bot.message_handler(regexp="veg|vegan|nonveg")
+def change_to_veg(message):
+    chat_id = message.chat.id
+    diet = -1
+
+    if message.text.lower() == "veg":
+        diet = 0
+    elif message.text.lower() == "vegan":
+        diet = 1
+    elif message.text.lower() == "nonveg":
+        diet = 2
+    else:
+        bot.reply_to(message, "Please check your input.")
+
+    if diet != -1:
+        dbhelper.change_diet_status(chat_id, diet)
+        bot.reply_to(message, "Dietary status updated to " + message.text + ".")
 
 # User prompted to enter & view basic information
 @bot.message_handler(commands=['myinfo'])
@@ -95,13 +114,24 @@ def send_myinfo(message):
             "*# of Recipes Rated:* {}\n\n".format(num_rated) +
             "*Recipes Uploaded:* \n\t\t{}\n\n".format(uploaded) +
             "*Recipes Liked:* \n\t\t{}\n".format(liked) +
-            "\nTo access the recipes above, type in the recipe id (i.e. number displayed before recipe name). You can only prompt for one recipe at a time."
+            "\nTo access the recipes above, type in the recipe id (i.e. number" +
+            " displayed before recipe name). You can only prompt for one recipe at a time.\n" +
+            "\nDietary status can be changed by typing 'veg' (dairy dishes recommended)" +
+            ", 'vegan' (dairy dishes not recommended), or 'nonveg'.\n" +
+            "\nTo maintain ingredients, go to /ingredients. To maintain" +
+            " utensils, go to /utensils. To adjust preferences, go to /preferences."
             , parse_mode='Markdown')
 
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
+
+
+# User can view and change diet
+@bot.message_handler(commands=['diet'])
+def send_diet(message):
+    chat_id = message.chat.id
 
 
 # user prompted to manually enter available ingredients
