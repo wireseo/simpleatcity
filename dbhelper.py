@@ -2,6 +2,7 @@ import pymysql
 from pymysql import IntegrityError
 import pandas as pd
 import random
+from classes import Cache
 
 db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.amazonaws.com',
                         port=3306,
@@ -481,19 +482,101 @@ def get_recipe_with_id(rid):
         print(message)
 
 
-def get_all_ingredients():
+def cache_ingredients():
     try:
         curs = db.cursor()
 
         # execute SQL query
-        sql = "SELECT ing_name_1, ing_name_2, ing_name_3, ing_name_4, ing_name_5 FROM ingredients"
+        sql = "SELECT ing_id, ing_name_1, ing_name_2, ing_name_3, ing_name_4, ing_name_5 FROM ingredients"
         curs.execute(sql)
 
         # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - get all ingredients" + str(data))
-            return "There are no ingredients in the db. Please contact the administrator."
+            __init__.ingred_string = "There are no ingredients in the db. Please contact the administrator."
+        else:
+            newdata = []
+            for tup in data:
+                newdata.append(' | '.join(filter(None, tup[1:])))
+                for i in range (0, 5):
+                    if tup[i]:
+                        Cache.ingred_dict[str(tup[i + 1])] = tup[0]
+                    i = i + 1
+            Cache.ingred_string = '\n'.join(newdata)
+
+    except Exception as e:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print(message)
+
+
+def add_ingredients_to_user(chat_id, ingredlst):
+    for ingred in ingredlst:
+        id = Cache.ingred_dict.get(ingred)
+        print(id)
+        try:
+            curs1 = db.cursor()
+
+            # execute SQL query
+            sql1 = "SELECT (B.id) FROM users_ingredients A JOIN users B ON A.user_id = B.id WHERE B.user_id = " + str(chat_id)
+
+            curs1.execute(sql1)
+            db.commit()
+            user_id = curs1.fetchone()[0]
+            print("uid: " + str(user_id))
+
+            curs2 = db.cursor()
+            sql2 = "INSERT IGNORE INTO users_ingredients (user_id, ing_id) VALUES (" + str(user_id) + ", " + str(id) +")"
+            curs2.execute(sql2)
+            db.commit()
+        except Exception as e:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(e).__name__, e.args)
+            print(message)
+
+
+def remove_ingredients_from_user(chat_id, ingredlst):
+    for ingred in ingredlst:
+        id = Cache.ingred_dict.get(ingred)
+        print(id)
+        try:
+            curs1 = db.cursor()
+
+            # execute SQL query
+            sql1 = "SELECT (B.id) FROM users_ingredients A JOIN users B ON A.user_id = B.id WHERE B.user_id = " + str(chat_id)
+
+            curs1.execute(sql1)
+            db.commit()
+            
+            user_id = curs1.fetchone()[0]
+            print("uid: " + str(user_id))
+
+            curs2 = db.cursor()
+            sql = "DELETE FROM users_ingredients WHERE (user_id = " + str(user_id) + ") AND (ing_id = " + str(id) + ")"
+            curs2.execute(sql)
+
+            # commit
+            db.commit()
+        except Exception as e:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(e).__name__, e.args)
+            print(message)
+
+
+# Necessary for quick access to ing_id...
+def setup_ingred_dictionary():
+    dict = {}
+    try:
+        curs = db.cursor()
+        # execute SQL query
+        sql = "SELECT * FROM ingredients"
+        curs.execute(sql)
+
+        # fetch data
+        data = curs.fetchone()
+        if not data:
+            print("Nonexistent ingredient " + str(ingred))
         else:
             newdata = []
             for tup in data:
@@ -507,6 +590,7 @@ def get_all_ingredients():
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
+    return None
 
 # convert query results(list of tuples) to a string
 def query_result_to_str(list):

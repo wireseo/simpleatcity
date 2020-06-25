@@ -2,11 +2,15 @@ import telebot
 import inspect
 from enums import Diet
 from classes import User
+from classes import Cache
 import dbhelper
 
 bot = telebot.TeleBot("1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0")
 
 user_list = []
+
+dbhelper.cache_ingredients()
+print(Cache.ingred_dict)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -92,6 +96,32 @@ def change_to_veg(message):
         bot.reply_to(message, "Dietary status updated to " + message.text + ".")
 
 
+# Handles the case where ingredients are added
+@bot.message_handler(regexp="\+")
+def add_ingredients(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    if len(text) <= 2:
+        bot.reply_to(message, "Please check your input.")
+    else:
+        ingredlst = text[2:].split(",")
+        dbhelper.add_ingredients_to_user(chat_id, ingredlst)
+        bot.reply_to(message, "Ingredients added.")
+
+
+# Handles the case where ingredients are removed
+@bot.message_handler(regexp="\-")
+def remove_ingredients(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    if len(text) <= 2:
+        bot.reply_to(message, "Please check your input.")
+    else:
+        ingredlst = text[2:].split(",")
+        dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
+        bot.reply_to(message, "Ingredients removed.")
+
+
 # User prompted to enter & view basic information
 @bot.message_handler(commands=['myinfo'])
 def send_myinfo(message):
@@ -130,10 +160,26 @@ def send_myinfo(message):
         print(message)
 
 
-# User can view and change diet
+# User can view all accepted ingredients
 @bot.message_handler(commands=['acceptedingredients'])
 def send_accepted_ingredients(message):
-    msg = bot.reply_to(message, dbhelper.get_all_ingredients())
+    msg = bot.reply_to(message, Cache.ingred_string)
+
+
+# User can view and update ingredients
+@bot.message_handler(commands=['ingredients'])
+def send_ingredients(message):
+    chat_id = message.chat.id
+    items = dbhelper.get_ingredients(chat_id)
+
+    msg = bot.reply_to(message, "*Items in Fridge:* \n{}\n\n".format(items) +
+    "To add ingredients, type in a list of ingredients with a '+' in front of it." +
+    " Make sure that each is separated with a comma and are in singular form" +
+    " without spaces in between (e.g. + avocado,soymilk,lettuce).\n\n" +
+    "To remove existing ingredients, type in a list of ingredients with a '-' in front of it.\n\n" +
+    "If the bot does not recognize your input, try inputting a more general version of it" +
+    " (ex. portobello to mushroom) or try searching for it in /acceptedingredients.\n\n" +
+    "Do not attempt to remove and add at the same time.")
 
 
 # user prompted to manually enter available ingredients
@@ -159,6 +205,7 @@ def ask_ingredients(message):
 def send_quickrecipe(ingredients):
     recipe = dbhelper.get_quickrecipe(ingredients.text)
     bot.reply_to(ingredients, recipe)
+
 
 bot.enable_save_next_step_handlers(delay=2)
 bot.load_next_step_handlers()

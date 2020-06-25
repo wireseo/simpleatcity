@@ -1,3 +1,7 @@
+class Cache:
+    ingred_string = ""
+    ingred_dict = {}
+
 class User:
     # requires tele_id at initialization
     # Initializes all fields but sets everything except tele_id to None (null)
