@@ -15,24 +15,16 @@ db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.am
 # get recipe based on ingredient input
 def get_quickrecipe(ing_name_str):
     try:
-        ## print('These are the inputs : {}'.format(ing_name_str))
         curs = db.cursor()
         # split ingredients_name to a list of ingredients_name
         ing_name_list = [x.replace(' ', '') for x in ing_name_str.split(',')]
-        ## print('Below are the elements of the ing_name_list')
-        ## for a in ing_name_list:
-        ##        print(a)
         # convert ingredients_name to ingredients_id
         ing_id_list = [ing_name_to_id(e) for e in ing_name_list]
-        ## print('Below are the elements of the ing_id_list')
-        ## for b in ing_id_list:
-        ##    print(b)
         # concatenate list of ingredients_id into a string
         ing_id_str = ','.join(map(str, ing_id_list))
-        ## print('This is the concatenated string of ing_id : {}'.format(ing_id_str))
         sql = """
             SELECT DISTINCT
-                r.instructions
+                r.rec_name, r.instructions
             FROM
                 recipes AS r
             JOIN recipes_main AS mi ON r.rec_id = mi.rec_id
@@ -112,7 +104,7 @@ def get_recipe(user):
         # find all available recipes based on ingreidents, utensils, and diet
         curs = db.cursor()
         sql = """
-        SELECT r.instructions FROM recipes r
+        SELECT r.rec_name, r.instructions FROM recipes r
             WHERE diet = {}
                 AND rec_id IN ({})
                 AND rec_id IN ({});
@@ -132,7 +124,7 @@ def get_recipe(user):
 # retrieve random element from input list
 def get_random(input):
     r = random.randint(0, len(input) - 1)
-    return str(input[r][0])
+    return 'Would you like to try "' + str(input[r][0]).lower() + '"?\n' + str(input[r][1])
 
 
 # convert ingredient name to ingredient id
