@@ -50,11 +50,7 @@ def get_quickrecipe(ing_name_str):
         else:
             return get_random(final_quickrec)
     except Exception as e:
-        template = """
-        An exception of type {0} occurred while retrieving quickrecipe suggestion.
-        Arguments:\n{1!r}"""
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'Sorry, an unexpected error has occured. Please try again :('
 
 
@@ -129,11 +125,7 @@ def get_recipe(user):
         else:
             return get_random(final_rec)
     except Exception as e:
-        template = """
-        An exception of type {0} occurred while retrieving recipe suggestion.
-        Arguments:\n{1!r}"""
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'Sorry, an unexpected error has occured. Please try again :('
 
 
@@ -161,46 +153,22 @@ def ing_name_to_id(ing_name_):
         # return first column 'ing_id'
         return ing_row[0]
     except Exception as e:
-        template = """
-        An exception of type {0} occurred while converting ingredient name to id.
-        Arguments:\n{1!r}"""
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
+
+# display all recipes
 def display_recipe():
     try:
         curs = db.cursor()
-# fetch data
-#rows = curs.fetchall()
-
-        # execute SQL query
         sql = "SELECT * from recipes"
         curs.execute(sql)
-# all rows
-#print(rows[0])
-
-        # fetch data
         rows = curs.fetchall()
-# print column names of 'users' table
-#sql2 = 'SHOW COLUMNS FROM users'
-#curs.execute(sql2)
-
-#col_name = curs.fetchall()
-
-#for name in col_name:
-#    print(name[0])
-
-# close connection
-#db.close()
-
-        # all rows
         print(rows[0])
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# add user to database
 def add_user(chat_id):
     try:
         curs = db.cursor()
@@ -214,12 +182,10 @@ def add_user(chat_id):
     except IntegrityError as ie:
         return False
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
-# veg = 0, vegan = 1, non veg = 2
+# retrieve user's diet
 def get_diet(chat_id):
     try:
         curs = db.cursor()
@@ -244,9 +210,7 @@ def get_diet(chat_id):
 
         return diet
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's diet from user information
@@ -260,11 +224,10 @@ def get_diet_from_user(user):
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        template = "An exception of type {0} occurred while retrieving diet from user. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# retrieve user's list of ingredients
 def get_ingredients(chat_id):
     try:
         curs = db.cursor()
@@ -281,9 +244,7 @@ def get_ingredients(chat_id):
             data = ', '.join([i for tup in data for i in tup])
             return data
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve a list of ingredient_id from user information
@@ -297,11 +258,10 @@ def get_ingredients_from_user(user):
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        template = "An exception of type {0} occurred while retrieving ingredients from user. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# retrieve user's list of utensils
 def get_utensils(chat_id):
     try:
         curs = db.cursor()
@@ -318,9 +278,32 @@ def get_utensils(chat_id):
             data = ', '.join([i for tup in data for i in tup])
             return data
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# retrieve all available utensils
+def get_all_utensils():
+    try:
+        curs = db.cursor()
+
+        # execute SQL query
+        sql = "SELECT * FROM utensils"
+        curs.execute(sql)
+
+        # fetch data
+        data = curs.fetchall()
+        if not data:
+            print("Nope - get all utensils" + str(data))
+            return "There are no utensils in the db. Please contact the administrator."
+        else:
+            newdata = []
+            for i, (id, name, alt_name) in enumerate(data):
+                newdata.append((str(id) + ". " + str(name) + ("" if not alt_name else (" / " + alt_name))))
+            newdata = '\n\t\t'.join(newdata)
+            return newdata
+
+    except Exception as e:
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's utensils from user information
@@ -334,11 +317,10 @@ def get_utensils_from_user(user):
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        template = "An exception of type {0} occurred while retrieving utensils from user. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# retrieve user's likes
 def get_likes(chat_id):
     try:
         curs = db.cursor()
@@ -355,11 +337,10 @@ def get_likes(chat_id):
             data = ', '.join([i for tup in data for i in tup])
             return data
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# retrieve user's dislikes
 def get_dislikes(chat_id):
     try:
         curs = db.cursor()
@@ -376,11 +357,35 @@ def get_dislikes(chat_id):
             data = ', '.join([i for tup in data for i in tup])
             return data
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# retrieve all categories
+def get_all_categories():
+    try:
+        curs = db.cursor()
+
+        # execute SQL query
+        sql = "SELECT * FROM categories ORDER BY id"
+        curs.execute(sql)
+
+        # fetch data
+        data = curs.fetchall()
+        if not data:
+            print("Nope - get all categories" + str(data))
+            return "There are no categories in the db. Please contact the administrator."
+        else:
+            newdata = []
+            for i, (id, name) in enumerate(data):
+                newdata.append(str(id) + ". " + str(name))
+            newdata = ', '.join(newdata)
+            return newdata
+
+    except Exception as e:
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# retrieve user's number of dishes rated
 def get_num_rated(chat_id):
     try:
         curs = db.cursor()
@@ -395,11 +400,10 @@ def get_num_rated(chat_id):
             print("Nope - num rated")
         return data[0]
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# retrieve user's list of recipes uploaded
 def get_recipes_uploaded(chat_id):
     try:
         curs = db.cursor()
@@ -419,11 +423,10 @@ def get_recipes_uploaded(chat_id):
             newdata = '\n\t\t'.join(newdata)
             return newdata
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# retrieve user's list of recipes liked
 def get_recipes_liked(chat_id):
     try:
         curs = db.cursor()
@@ -443,11 +446,10 @@ def get_recipes_liked(chat_id):
             newdata = '\n\t\t'.join(newdata)
             return newdata
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# update user's dietary status
 def change_diet_status(chat_id, diet):
     try:
         curs = db.cursor()
@@ -456,11 +458,10 @@ def change_diet_status(chat_id, diet):
         sql = "UPDATE users SET diet = '" + str(diet) + "' WHERE (user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# get a recipe from the db with its id
 def get_recipe_with_id(rid):
     try:
         curs = db.cursor()
@@ -477,11 +478,10 @@ def get_recipe_with_id(rid):
         else:
             return data[0] + "\n\n" + data[1]
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# cache a dictionary of ingredients by name and id
 def cache_ingredients():
     try:
         curs = db.cursor()
@@ -506,91 +506,124 @@ def cache_ingredients():
             Cache.ingred_string = '\n'.join(newdata)
 
     except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# add ingredients to user
 def add_ingredients_to_user(chat_id, ingredlst):
+    user_id = get_uid_with_chat_id(chat_id)
     for ingred in ingredlst:
         id = Cache.ingred_dict.get(ingred)
         print(id)
         try:
-            curs1 = db.cursor()
-
-            # execute SQL query
-            sql1 = "SELECT (B.id) FROM users_ingredients A JOIN users B ON A.user_id = B.id WHERE B.user_id = " + str(chat_id)
-
-            curs1.execute(sql1)
-            db.commit()
-            user_id = curs1.fetchone()[0]
-            print("uid: " + str(user_id))
-
-            curs2 = db.cursor()
-            sql2 = "INSERT IGNORE INTO users_ingredients (user_id, ing_id) VALUES (" + str(user_id) + ", " + str(id) +")"
-            curs2.execute(sql2)
+            curs = db.cursor()
+            sql = "INSERT IGNORE INTO users_ingredients (user_id, ing_id) VALUES (" + str(user_id) + ", " + str(id) +")"
+            curs.execute(sql)
             db.commit()
         except Exception as e:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(e).__name__, e.args)
-            print(message)
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
+# remove ingredients from user
 def remove_ingredients_from_user(chat_id, ingredlst):
+    user_id = get_uid_with_chat_id(chat_id)
     for ingred in ingredlst:
         id = Cache.ingred_dict.get(ingred)
         print(id)
         try:
-            curs1 = db.cursor()
-
-            # execute SQL query
-            sql1 = "SELECT (B.id) FROM users_ingredients A JOIN users B ON A.user_id = B.id WHERE B.user_id = " + str(chat_id)
-
-            curs1.execute(sql1)
-            db.commit()
-            
-            user_id = curs1.fetchone()[0]
-            print("uid: " + str(user_id))
-
-            curs2 = db.cursor()
+            curs = db.cursor()
             sql = "DELETE FROM users_ingredients WHERE (user_id = " + str(user_id) + ") AND (ing_id = " + str(id) + ")"
-            curs2.execute(sql)
-
-            # commit
+            curs.execute(sql)
             db.commit()
         except Exception as e:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(e).__name__, e.args)
-            print(message)
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
-# Necessary for quick access to ing_id...
-def setup_ingred_dictionary():
-    dict = {}
-    try:
-        curs = db.cursor()
-        # execute SQL query
-        sql = "SELECT * FROM ingredients"
-        curs.execute(sql)
+# add utensils to user
+def add_utensils_to_user(chat_id, utenlst):
+    user_id = get_uid_with_chat_id(chat_id)
+    for uten in utenlst:
+        try:
+            curs = db.cursor()
+            sql = "INSERT IGNORE INTO users_utensils (user_id, uten_id) VALUES (" + str(user_id) + ", " + str(uten) +")"
+            curs.execute(sql)
+            db.commit()
+        except Exception as e:
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
-        # fetch data
-        data = curs.fetchone()
-        if not data:
-            print("Nonexistent ingredient " + str(ingred))
-        else:
-            newdata = []
-            for tup in data:
-                print(tup)
-                newdata.append(' | '.join(filter(None, tup)))
-                print(newdata)
-            str = '\n'.join(newdata)
-            return str
 
-    except Exception as e:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print(message)
-    return None
+# remove utensils from user
+def remove_utensils_from_user(chat_id, utenlst):
+    user_id = get_uid_with_chat_id(chat_id)
+    for uten in utenlst:
+        try:
+            curs = db.cursor()
+            sql = "DELETE FROM users_utensils WHERE (user_id = " + str(user_id) + ") AND (uten_id = " + str(uten) + ")"
+            curs.execute(sql)
+            db.commit()
+        except Exception as e:
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# add likes to user
+def add_likes_to_user(chat_id, likeslst):
+    user_id = get_uid_with_chat_id(chat_id)
+    for like in likeslst:
+        try:
+            curs = db.cursor()
+            sql = "INSERT IGNORE INTO users_likes (user_id, cat_id) VALUES (" + str(user_id) + ", " + str(like) +")"
+            curs.execute(sql)
+            db.commit()
+        except Exception as e:
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# remove likes from user
+def remove_likes_from_user(chat_id, likeslst):
+    user_id = get_uid_with_chat_id(chat_id)
+    for like in likeslst:
+        try:
+            curs = db.cursor()
+            sql = "DELETE FROM users_likes WHERE (user_id = " + str(user_id) + ") AND (cat_id = " + str(like) + ")"
+            curs.execute(sql)
+            db.commit()
+        except Exception as e:
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# add dislikes to user
+def add_dislikes_to_user(chat_id, dislikeslst):
+    user_id = get_uid_with_chat_id(chat_id)
+    for dislike in dislikeslst:
+        try:
+            curs = db.cursor()
+            sql = "INSERT IGNORE INTO users_dislikes (user_id, cat_id) VALUES (" + str(user_id) + ", " + str(dislike) +")"
+            curs.execute(sql)
+            db.commit()
+        except Exception as e:
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# remove dislikes from user
+def remove_dislikes_from_user(chat_id, dislikeslst):
+    user_id = get_uid_with_chat_id(chat_id)
+    for dislike in dislikeslst:
+        try:
+            curs = db.cursor()
+            sql = "DELETE FROM users_dislikes WHERE (user_id = " + str(user_id) + ") AND (cat_id = " + str(dislike) + ")"
+            curs.execute(sql)
+            db.commit()
+        except Exception as e:
+            print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# get user db uid from chat_id
+def get_uid_with_chat_id(chat_id):
+    curs = db.cursor()
+    sql = "SELECT id FROM users WHERE user_id = " + str(chat_id)
+    curs.execute(sql)
+    return curs.fetchone()[0]
+
 
 # convert query results(list of tuples) to a string
 def query_result_to_str(list):
@@ -598,6 +631,6 @@ def query_result_to_str(list):
     return ','.join(map(str, flat_list))
 
 
+# close db connection
 def close_db():
-    # close connection
     db.close()

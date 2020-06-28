@@ -1,16 +1,12 @@
 import telebot
 import inspect
 from enums import Diet
-from classes import User
 from classes import Cache
 import dbhelper
 
 bot = telebot.TeleBot("1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0")
-
-user_list = []
-
 dbhelper.cache_ingredients()
-print(Cache.ingred_dict)
+# print(Cache.ingred_dict)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -23,9 +19,6 @@ def send_welcome(message):
         main ingredients that you have, head on to /quickrecipe.
         For a more detailed overview of the functionalities that this
         bot provides, use /help.""").replace('\n', ' '))
-    # getMe -- hmm where is this needed
-    #user_list.append(User())
-    #user = tb.get_me()
 
     try:
         chat_id = message.chat.id
@@ -71,7 +64,7 @@ def send_help(message):
 
 
 # Handles the case where only recipe id is entered
-@bot.message_handler(regexp="\d+")
+@bot.message_handler(regexp="^0*[1-9]\d*$")
 def send_rec_by_rec_id(message):
     bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
 
@@ -96,30 +89,103 @@ def change_to_veg(message):
         bot.reply_to(message, "Dietary status updated to " + message.text + ".")
 
 
-# Handles the case where ingredients are added
+# Handles the case where something is added
 @bot.message_handler(regexp="\+")
+def determine_type(message):
+    if len(message.text) <= 2:
+        bot.reply_to(message, "Please check your input.")
+    elif message.text[1].lower() == "l":
+        add_likes(message)
+    elif message.text[1].lower() == "d":
+        add_dislikes(message)
+    elif message.text[2].isdigit():
+        add_utensils(message)
+    else:
+        add_ingredients(message)
+
+
+def add_likes(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    if len(text) <= 3:
+        bot.reply_to(message, "Please check your input.")
+    else:
+        likeslst = text[3:].split(",")
+        dbhelper.add_likes_to_user(chat_id, likeslst)
+        bot.reply_to(message, "Likes added.")
+
+def add_dislikes(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    if len(text) <= 3:
+        bot.reply_to(message, "Please check your input.")
+    else:
+        dislikeslst = text[3:].split(",")
+        dbhelper.add_dislikes_to_user(chat_id, dislikeslst)
+        bot.reply_to(message, "Dislikes added.")
+
+def add_utensils(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    utenlst = text[2:].split(",")
+    dbhelper.add_utensils_to_user(chat_id, utenlst)
+    bot.reply_to(message, "Utensils added.")
+
 def add_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
-    if len(text) <= 2:
+    ingredlst = text[2:].split(",")
+    dbhelper.add_ingredients_to_user(chat_id, ingredlst)
+    bot.reply_to(message, "Ingredients added.")
+
+
+# Handles the case where something is removed
+@bot.message_handler(regexp="\-")
+def determine_type(message):
+    if len(message.text) <= 2:
+        bot.reply_to(message, "Please check your input.")
+    elif message.text[1].lower() == "l":
+        remove_likes(message)
+    elif message.text[1].lower() == "d":
+        remove_dislikes(message)
+    elif message.text[2].isdigit():
+        remove_utensils(message)
+    else:
+        remove_ingredients(message)
+
+def remove_likes(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
-        ingredlst = text[2:].split(",")
-        dbhelper.add_ingredients_to_user(chat_id, ingredlst)
-        bot.reply_to(message, "Ingredients added.")
+        likeslst = text[3:].split(",")
+        dbhelper.remove_likes_from_user(chat_id, likeslst)
+        bot.reply_to(message, "Likes removed.")
 
+def remove_dislikes(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    if len(text) <= 3:
+        bot.reply_to(message, "Please check your input.")
+    else:
+        dislikeslst = text[3:].split(",")
+        dbhelper.remove_dislikes_from_user(chat_id, dislikeslst)
+        bot.reply_to(message, "Dislikes removed.")
 
-# Handles the case where ingredients are removed
-@bot.message_handler(regexp="\-")
+def remove_utensils(message):
+    chat_id = message.chat.id
+    text = message.text.lower()
+    utenlst = text[2:].split(",")
+    dbhelper.remove_utensils_from_user(chat_id, utenlst)
+    bot.reply_to(message, "Utensils removed.")
+
 def remove_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
-    if len(text) <= 2:
-        bot.reply_to(message, "Please check your input.")
-    else:
-        ingredlst = text[2:].split(",")
-        dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
-        bot.reply_to(message, "Ingredients removed.")
+    ingredlst = text[2:].split(",")
+    dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
+    bot.reply_to(message, "Ingredients removed.")
 
 
 # User prompted to enter & view basic information
@@ -148,16 +214,24 @@ def send_myinfo(message):
             "*Recipes Liked:* \n\t\t{}\n".format(liked) +
             "\nTo access the recipes above, type in the recipe id (i.e. number" +
             " displayed before recipe name). You can only prompt for one recipe at a time.\n" +
-            "\nDietary status can be changed by typing 'veg' (dairy dishes recommended)" +
-            ", 'vegan' (dairy dishes not recommended), or 'nonveg'.\n" +
             "\nTo maintain ingredients, go to /ingredients. To maintain" +
-            " utensils, go to /utensils. To adjust preferences, go to /preferences."
+            " utensils, go to /utensils. To adjust preferences, go to /preferences. To change dietary status, go to /diet."
             , parse_mode='Markdown')
 
     except Exception as e:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(e).__name__, e.args)
         print(message)
+
+
+# User can change dietary status
+@bot.message_handler(commands=['diet'])
+def send_accepted_ingredients(message):
+    chat_id = message.chat.id
+    diet = dbhelper.get_diet(chat_id)
+    msg = bot.reply_to(message, "*Dietary Preference:* \n{}\n\n".format(diet) +
+    "Dietary status can be changed by typing 'veg' (dairy dishes recommended)" +
+    ", 'vegan' (dairy dishes not recommended), or 'nonveg'.\n", parse_mode='Markdown')
 
 
 # User can view all accepted ingredients
@@ -179,7 +253,39 @@ def send_ingredients(message):
     "To remove existing ingredients, type in a list of ingredients with a '-' in front of it.\n\n" +
     "If the bot does not recognize your input, try inputting a more general version of it" +
     " (ex. portobello to mushroom) or try searching for it in /acceptedingredients.\n\n" +
-    "Do not attempt to remove and add at the same time.")
+    "Do not attempt to remove and add at the same time.", parse_mode='Markdown')
+
+
+# User can view and update utensils
+@bot.message_handler(commands=['utensils'])
+def send_utensils(message):
+    chat_id = message.chat.id
+    utensils = dbhelper.get_utensils(chat_id)
+    all_utensils = dbhelper.get_all_utensils()
+
+    msg = bot.reply_to(message, "*Utensils in Kitchen:* \n{}\n\n".format(utensils) +
+    "*Available Utensils:* \n\t\t{}\n\n".format(all_utensils) +
+    "To add utensils, type in a list of utensil ids with a '+' in front of it." +
+    " Make sure that each is separated with a comma without spaces in between (e.g. + 1,2,3).\n\n" +
+    "To remove existing utensils, type in a list of utensil ids with a '-' in front of it.\n\n" +
+    "Do not attempt to remove and add at the same time.", parse_mode='Markdown')
+
+
+# User can view and update preferences
+@bot.message_handler(commands=['preferences'])
+def send_preferences(message):
+    chat_id = message.chat.id
+    likes = dbhelper.get_likes(chat_id)
+    dislikes = dbhelper.get_dislikes(chat_id)
+    all_cats = dbhelper.get_all_categories()
+
+    msg = bot.reply_to(message, "*Likes:* {}\n\n".format(likes) + "*Dislikes:* {}\n\n".format(dislikes) +
+    "*All Categories:* \n{}\n\n".format(all_cats) +
+    "To like categories, type in a list of category ids with a '+L' in front of it." +
+    " Make sure that each is separated with a comma without spaces in between (e.g. +L 1,2). " +
+    "To un-like categories, type in a list of category ids with a '-L' in front of it.\n\n" +
+    "To dislike categories, the keyword is '+D'. To un-dislike, the keyword is '-D'."
+    "\n\nDo not attempt to remove and add at the same time.", parse_mode='Markdown')
 
 
 # user prompted to manually enter available ingredients
@@ -209,9 +315,4 @@ def send_quickrecipe(ingredients):
 
 bot.enable_save_next_step_handlers(delay=2)
 bot.load_next_step_handlers()
-
-#commented out due to InterfaceError
-#dbhelper.close_db()
-
-
 bot.polling()
