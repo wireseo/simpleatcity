@@ -1,10 +1,13 @@
 import telebot
+from telebot import types
 import inspect
 from enums import Diet
 from classes import Cache
 import dbhelper
 
-bot = telebot.TeleBot("1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0")
+
+TOKEN = '1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0'
+bot = telebot.TeleBot(TOKEN)
 dbhelper.cache_ingredients()
 # print(Cache.ingred_dict)
 
@@ -294,23 +297,63 @@ def ask_ingredients(message):
     ingredients = bot.reply_to(message, inspect.cleandoc("""
         Please enter the available ingredients.
 
-        Use singular form for ingredients and seperate with commas.
-        ex) tomato, egg"""))
+        Use singular form for ingredients and seperate different ingredients with commas.
+        ex) avocado, bacon, cauliflower"""))
     bot.register_next_step_handler(ingredients, send_quickrecipe)
-
-
-# user given recipe based on user information
-@bot.message_handler(commands=['recipe'])
-def ask_ingredients(message):
-    user = message.chat.id
-    recipe = dbhelper.get_recipe(user)
-    bot.reply_to(message, recipe)
 
 
 # suggest recipe based on given ingredients
 def send_quickrecipe(ingredients):
     recipe = dbhelper.get_quickrecipe(ingredients.text)
-    bot.reply_to(ingredients, recipe)
+    if recipe == 'norec':
+        bot.reply_to(ingredients, 'No recipe found :(')
+    elif recipe == 'error':
+        bot.reply_to(ingredients, 'Sorry, an unexpected error has occured. Please try again :(')
+    else:
+        # set the global variable to store list of recipe
+        Cache.final_recipe_list = recipe
+        gen_recipe(ingredients, Cache.final_recipe_list)
+
+
+# user given recipe based on user information
+@bot.message_handler(commands=['recipe'])
+def ask_recipe(message):
+    chat_id = message.chat.id
+    recipe = dbhelper.get_recipe(chat_id)
+    bot.reply_to(message, recipe)
+
+
+# process response from user 1) like 2) dislike 3) another
+def process_callback(cb):
+    print('point3')
+    if cb.text == u'\U0001F44D Like':
+        # function to add recipe to like list
+        return
+    elif cb.text == u'\U0001F44E Dislike':
+        # function to add recipe to dislike list
+        return
+    elif cb.text == u'\U0001F64F Show me another recipe':
+        return gen_recipe(cb, Cache.final_recipe_list)
+    elif cb.text == u'\U0000274C Cancel':
+        return
+    else:
+        # default
+        return
+
+
+# show another recipe to the user
+def gen_recipe(message, recipe_list):
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+    itembtn_like = types.KeyboardButton('\U0001F44D Like')
+    itembtn_dislike = types.KeyboardButton('\U0001F44E Dislike')
+    itembtn_another = types.KeyboardButton('\U0001F64F Show me another recipe')
+    itembtn_cancel = types.KeyboardButton('\U0000274C Cancel')
+    markup.row(itembtn_like, itembtn_dislike)
+    markup.row(itembtn_another)
+    markup.row(itembtn_cancel)
+    result = dbhelper.get_random(recipe_list)
+    callback = bot.reply_to(message, result, reply_markup=markup)
+    bot.register_next_step_handler(callback, process_callback)
 
 
 bot.enable_save_next_step_handlers(delay=2)

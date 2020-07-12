@@ -1,5 +1,6 @@
 import pymysql
 from pymysql import IntegrityError
+import telebot
 import pandas as pd
 import random
 from classes import Cache
@@ -11,17 +12,17 @@ db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.am
                         db='simpleatcitydb',
                         charset='utf8')
 
-
 # get recipe based on ingredient input
 def get_quickrecipe(ing_name_str):
     try:
         curs = db.cursor()
         # split ingredients_name to a list of ingredients_name
-        ing_name_list = [x.replace(' ', '') for x in ing_name_str.split(',')]
+        ing_name_list = [x.replace(' ', '') for x in ing_name_str.lower().split(',')]
         # convert ingredients_name to ingredients_id
         ing_id_list = [ing_name_to_id(e) for e in ing_name_list]
         # concatenate list of ingredients_id into a string
         ing_id_str = ','.join(map(str, ing_id_list))
+
         sql = """
             SELECT DISTINCT
                 r.rec_name, r.instructions
@@ -38,12 +39,13 @@ def get_quickrecipe(ing_name_str):
         final_quickrec = curs.fetchall()
         # if no recipe exists
         if len(final_quickrec) == 0:
-            return 'No recipe found :('
+            return 'norec'
         else:
-            return get_random(final_quickrec)
+            # return get_random(final_quickrec)
+            return final_quickrec
     except Exception as e:
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
-        return 'Sorry, an unexpected error has occured. Please try again :('
+        return 'error'
 
 
 # get recipe based on user information
@@ -61,7 +63,7 @@ def get_recipe(user):
             FROM
                 recipes AS r
             JOIN recipes_main AS mi ON r.rec_id = mi.rec_id
-            JOIN ingredients AS i ON mi.ing_id = i.ing_id
+            JOIN ingredients AS i ON mi.ing_id = i.ing_i
             LEFT JOIN recipes_main AS noIng ON r.rec_id = noIng.rec_id
                 AND noIng.ing_id NOT IN ({})
             WHERE i.ing_id IN ({})
