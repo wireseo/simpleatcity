@@ -4,7 +4,7 @@ import inspect
 from enums import Diet
 from classes import Cache
 import dbhelper
-
+import random
 
 TOKEN = '1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0'
 bot = telebot.TeleBot(TOKEN)
@@ -304,6 +304,7 @@ def ask_ingredients(message):
 
 # suggest recipe based on given ingredients
 def send_quickrecipe(ingredients):
+    chat_id = ingredients.chat.id
     recipe = dbhelper.get_quickrecipe(ingredients.text)
     if recipe == 'norec':
         bot.reply_to(ingredients, 'No recipe found :(')
@@ -311,8 +312,8 @@ def send_quickrecipe(ingredients):
         bot.reply_to(ingredients, 'Sorry, an unexpected error has occured. Please try again :(')
     else:
         # set the global variable to store list of recipe
-        Cache.final_recipe_list = recipe
-        gen_recipe(ingredients, Cache.final_recipe_list)
+        Cache.rec_list_dict[chat_id] = recipe
+        gen_recipe(ingredients, recipe)
 
 
 # user given recipe based on user information
@@ -325,17 +326,17 @@ def ask_recipe(message):
 
 # process response from user 1) like 2) dislike 3) another
 def process_callback(cb):
-    print('point3')
+    chat_id = cb.chat.id
     if cb.text == u'\U0001F44D Like':
         # function to add recipe to like list
-        return
+        return bot.reply_to(cb, dbhelper.like_recipe(cb))
     elif cb.text == u'\U0001F44E Dislike':
         # function to add recipe to dislike list
         return
     elif cb.text == u'\U0001F64F Show me another recipe':
-        return gen_recipe(cb, Cache.final_recipe_list)
-    elif cb.text == u'\U0000274C Cancel':
-        return
+        return gen_recipe(cb, Cache.rec_list_dict[chat_id])
+    # elif cb.text == u'\U0000274C Cancel':
+    #     return
     else:
         # default
         return
@@ -343,6 +344,7 @@ def process_callback(cb):
 
 # show another recipe to the user
 def gen_recipe(message, recipe_list):
+    chat_id = message.chat.id
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     itembtn_like = types.KeyboardButton('\U0001F44D Like')
     itembtn_dislike = types.KeyboardButton('\U0001F44E Dislike')
@@ -351,9 +353,22 @@ def gen_recipe(message, recipe_list):
     markup.row(itembtn_like, itembtn_dislike)
     markup.row(itembtn_another)
     markup.row(itembtn_cancel)
-    result = dbhelper.get_random(recipe_list)
-    callback = bot.reply_to(message, result, reply_markup=markup)
+    rand_idx = get_random_index(recipe_list)
+    Cache.rec_list_dict[chat_id] = recipe_list
+    Cache.rec_tup_dict[chat_id] = recipe_list[rand_idx]
+    rand_rec = get_random_recipe_str(recipe_list, rand_idx)
+    callback = bot.reply_to(message, rand_rec, reply_markup=markup)
     bot.register_next_step_handler(callback, process_callback)
+
+
+# retrieve random element from input list
+def get_random_index(input):
+    return random.randint(0, len(input) - 1)
+
+
+def get_random_recipe_str(input, idx):
+    return 'Would you like to try "' + str(input[idx][1]).lower() + '"?\n'
+    + str(input[idx][4])
 
 
 bot.enable_save_next_step_handlers(delay=2)

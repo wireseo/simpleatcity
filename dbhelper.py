@@ -25,7 +25,7 @@ def get_quickrecipe(ing_name_str):
 
         sql = """
             SELECT DISTINCT
-                r.rec_name, r.instructions
+                *
             FROM
                 recipes AS r
             JOIN recipes_main AS mi ON r.rec_id = mi.rec_id
@@ -44,7 +44,8 @@ def get_quickrecipe(ing_name_str):
             # return get_random(final_quickrec)
             return final_quickrec
     except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving quickrecipe."
+        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'error'
 
 
@@ -106,7 +107,7 @@ def get_recipe(user):
         # find all available recipes based on ingreidents, utensils, and diet
         curs = db.cursor()
         sql = """
-        SELECT r.rec_name, r.instructions FROM recipes r
+        SELECT * FROM recipes r
             WHERE diet = {}
                 AND rec_id IN ({})
                 AND rec_id IN ({});
@@ -117,16 +118,12 @@ def get_recipe(user):
         if len(final_rec) == 0:
             return 'No recipe found :('
         else:
-            return get_random(final_rec)
+            # plz don't forget to fix!!!
+            # return get_random(final_rec)
+            return
     except Exception as e:
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'Sorry, an unexpected error has occured. Please try again :('
-
-
-# retrieve random element from input list
-def get_random(input):
-    r = random.randint(0, len(input) - 1)
-    return 'Would you like to try "' + str(input[r][0]).lower() + '"?\n' + str(input[r][1])
 
 
 # convert ingredient name to ingredient id
@@ -147,7 +144,8 @@ def ing_name_to_id(ing_name_):
         # return first column 'ing_id'
         return ing_row[0]
     except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving recipe."
+        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # display all recipes
@@ -609,6 +607,20 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+# add the recipe to the user's liked list
+def like_recipe(msg):
+    chat_id = msg.chat.id
+    user_id = get_uid_with_chat_id(chat_id)
+    try:
+        curs = db.cursor()
+        sql = "INSERT IGNORE INTO users_liked (user_id, rec_id) VALUES (" + str(user_id) + ", " + str(Cache.rec_tup_dict[chat_id][0]) +")"
+        curs.execute(sql)
+        db.commit()
+    except Exception as e:
+        print("An exception of type {0} occurred while adding recipe to liked list."
+        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return '"{}" successfully added to liked list!'.format(str(Cache.rec_tup_dict[chat_id][1]))
 
 
 # get user db uid from chat_id
