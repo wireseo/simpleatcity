@@ -332,7 +332,7 @@ def process_callback(cb):
         return bot.reply_to(cb, dbhelper.like_recipe(cb))
     elif cb.text == u'\U0001F44E Dislike':
         # function to add recipe to dislike list
-        return
+        return bot.reply_to(cb, dbhelper.dislike_recipe(cb))
     elif cb.text == u'\U0001F64F Show me another recipe':
         return gen_recipe(cb, Cache.rec_list_dict[chat_id])
     # elif cb.text == u'\U0000274C Cancel':
@@ -367,9 +367,7 @@ def get_random_index(input):
 
 
 def get_random_recipe_str(input, idx):
-    return 'Would you like to try "' + str(input[idx][1]).lower() + '"?\n'
-    + str(input[idx][4])
-
+    return 'Would you like to try "{}"?\n {}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
 
 bot.enable_save_next_step_handlers(delay=2)
 bot.load_next_step_handlers()

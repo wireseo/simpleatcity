@@ -42,6 +42,7 @@ def get_quickrecipe(ing_name_str):
             return 'norec'
         else:
             # return get_random(final_quickrec)
+            # print(final_quickrec)
             return final_quickrec
     except Exception as e:
         print("An exception of type {0} occurred while retrieving quickrecipe."
@@ -614,13 +615,40 @@ def like_recipe(msg):
     user_id = get_uid_with_chat_id(chat_id)
     try:
         curs = db.cursor()
-        sql = "INSERT IGNORE INTO users_liked (user_id, rec_id) VALUES (" + str(user_id) + ", " + str(Cache.rec_tup_dict[chat_id][0]) +")"
-        curs.execute(sql)
+        # check if the recipe is already in disliked list
+        sql_check = "SELECT EXISTS(SELECT * FROM users_disliked WHERE user_id = {})".format(user_id)
+        curs.execute(sql_check)
+        duplicate = curs.fetchall()
+        if duplicate[0][0] == 1:
+            return 'You have already added "{}" to your disliked list :(\n\nPlease remove it from your disliked list before adding it to your liked list'.format(str(Cache.rec_tup_dict[chat_id][1]))
+        sql_like = "INSERT IGNORE INTO users_liked (user_id, rec_id) VALUES (" + str(user_id) + ", " + str(Cache.rec_tup_dict[chat_id][0]) +")"
+        curs.execute(sql_like)
         db.commit()
     except Exception as e:
         print("An exception of type {0} occurred while adding recipe to liked list."
         + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
-    return '"{}" successfully added to liked list!'.format(str(Cache.rec_tup_dict[chat_id][1]))
+    return 'You have successfully added "{}" to your liked list :)'.format(str(Cache.rec_tup_dict[chat_id][1]))
+
+
+# add the recipe to the user's liked list
+def dislike_recipe(msg):
+    chat_id = msg.chat.id
+    user_id = get_uid_with_chat_id(chat_id)
+    try:
+        curs = db.cursor()
+        # check if the recipe is already in disliked list
+        sql_check = "SELECT EXISTS(SELECT * FROM users_liked WHERE user_id = {})".format(user_id)
+        curs.execute(sql_check)
+        duplicate = curs.fetchall()
+        if duplicate[0][0] == 1:
+            return 'You have already added "{}" to your liked list :(\n\nPlease remove it from your liked list before adding it to your disliked list'.format(str(Cache.rec_tup_dict[chat_id][1]))
+        sql_like = "INSERT IGNORE INTO users_disliked (user_id, rec_id) VALUES (" + str(user_id) + ", " + str(Cache.rec_tup_dict[chat_id][0]) +")"
+        curs.execute(sql_like)
+        db.commit()
+    except Exception as e:
+        print("An exception of type {0} occurred while adding recipe to disliked list."
+        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return 'You have successfully added "{}" to your disliked list :)'.format(str(Cache.rec_tup_dict[chat_id][1]))
 
 
 # get user db uid from chat_id
