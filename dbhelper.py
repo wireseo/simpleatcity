@@ -165,12 +165,8 @@ def display_recipe():
 def add_user(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "INSERT INTO users (user_id) VALUES (" + str(chat_id) + ")"
         curs.execute(sql)
-
-        # commit
         db.commit()
     except IntegrityError as ie:
         return False
@@ -182,12 +178,8 @@ def add_user(chat_id):
 def get_diet(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT (diet) FROM users WHERE (user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchone()
         if data == None:
             print("Nope")
@@ -210,10 +202,8 @@ def get_diet(chat_id):
 def get_diet_from_user(user):
     try:
         curs = db.cursor()
-        # execute SQL query
         sql = "SELECT diet FROM users WHERE user_id = {}".format(user)
         curs.execute(sql)
-        # fetch data
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
@@ -224,12 +214,8 @@ def get_diet_from_user(user):
 def get_ingredients(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT (ing_name_1) FROM users_ingredients A JOIN ingredients B ON A.ing_id = B.ing_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - ingredients " + str(data))
@@ -244,10 +230,8 @@ def get_ingredients(chat_id):
 def get_ingredients_from_user(user):
     try:
         curs = db.cursor()
-        # execute SQL query
         sql = "SELECT ing_id FROM users a JOIN users_ingredients b ON a.id = b.user_id WHERE a.user_id = {}".format(user)
         curs.execute(sql)
-        # fetch data
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
@@ -258,12 +242,8 @@ def get_ingredients_from_user(user):
 def get_utensils(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT (B.name) FROM users_utensils A JOIN utensils B ON A.uten_id = B.id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - utensils" + str(data))
@@ -278,12 +258,8 @@ def get_utensils(chat_id):
 def get_all_utensils():
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT * FROM utensils"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - get all utensils" + str(data))
@@ -303,10 +279,8 @@ def get_all_utensils():
 def get_utensils_from_user(user):
     try:
         curs = db.cursor()
-        # execute SQL query
         sql = "SELECT uten_id FROM users a JOIN users_utensils b ON a.id = b.user_id WHERE a.user_id = {}".format(user)
         curs.execute(sql)
-        # fetch data
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
@@ -317,12 +291,8 @@ def get_utensils_from_user(user):
 def get_likes(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT (B.name) FROM users_likes A JOIN categories B ON A.cat_id = B.id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - likes" + str(data))
@@ -337,12 +307,8 @@ def get_likes(chat_id):
 def get_dislikes(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT (B.name) FROM users_dislikes A JOIN categories B ON A.cat_id = B.id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - dislikes" + str(data))
@@ -357,12 +323,8 @@ def get_dislikes(chat_id):
 def get_all_categories():
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT * FROM categories ORDER BY id"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - get all categories" + str(data))
@@ -382,12 +344,8 @@ def get_all_categories():
 def get_num_rated(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT (num_rated) FROM users WHERE (user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchone()
         if data == None:
             print("Nope - num rated")
@@ -400,12 +358,8 @@ def get_num_rated(chat_id):
 def get_recipes_uploaded(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT B.rec_name, B.rec_id FROM users_uploaded A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - recipes uploaded" + str(data))
@@ -423,12 +377,8 @@ def get_recipes_uploaded(chat_id):
 def get_recipes_liked(chat_id):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT B.rec_name, B.rec_id FROM users_liked A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - recipes liked" + str(data))
@@ -446,8 +396,6 @@ def get_recipes_liked(chat_id):
 def change_diet_status(chat_id, diet):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "UPDATE users SET diet = '" + str(diet) + "' WHERE (user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
     except Exception as e:
@@ -458,12 +406,8 @@ def change_diet_status(chat_id, diet):
 def get_recipe_with_id(rid):
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT rec_name, instructions FROM recipes WHERE (recipes.rec_id) = '" + str(rid) + "'"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchone()
         if not data:
             print("Nope - recipes with id" + str(data))
@@ -478,12 +422,8 @@ def get_recipe_with_id(rid):
 def cache_ingredients():
     try:
         curs = db.cursor()
-
-        # execute SQL query
         sql = "SELECT ing_id, ing_name_1, ing_name_2, ing_name_3, ing_name_4, ing_name_5 FROM ingredients"
         curs.execute(sql)
-
-        # fetch data
         data = curs.fetchall()
         if not data:
             print("Nope - get all ingredients" + str(data))
@@ -507,12 +447,15 @@ def add_ingredients_to_user(chat_id, ingredlst):
     user_id = get_uid_with_chat_id(chat_id)
     for ingred in ingredlst:
         id = Cache.ingred_dict.get(ingred)
+        if id is None:
+            return "Please check your input. One or more ingredients are not recognized."
         print(id)
         try:
             curs = db.cursor()
             sql = "INSERT IGNORE INTO users_ingredients (user_id, ing_id) VALUES (" + str(user_id) + ", " + str(id) +")"
             curs.execute(sql)
             db.commit()
+            return "Ingredients added."
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
@@ -522,12 +465,15 @@ def remove_ingredients_from_user(chat_id, ingredlst):
     user_id = get_uid_with_chat_id(chat_id)
     for ingred in ingredlst:
         id = Cache.ingred_dict.get(ingred)
+        if id is None:
+            return "Please check your input. One or more ingredients are not recognized."
         print(id)
         try:
             curs = db.cursor()
             sql = "DELETE FROM users_ingredients WHERE (user_id = " + str(user_id) + ") AND (ing_id = " + str(id) + ")"
             curs.execute(sql)
             db.commit()
+            return "Ingredients removed."
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
@@ -649,6 +595,64 @@ def dislike_recipe(msg):
         print("An exception of type {0} occurred while adding recipe to disliked list."
         + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
     return 'You have successfully added "{}" to your disliked list :)'.format(str(Cache.rec_tup_dict[chat_id][1]))
+
+
+# add a new recipe
+def upload_recipe(strlst):
+    try:
+        curs = db.cursor()
+        sql = "INSERT IGNORE INTO recipes (`rec_name`, `category`, `diet`, `instructions`, `pending_approval`) VALUES ('{0}',{1},{2},'{3}',1)".format(str(strlst[0]), str(strlst[1]), str(strlst[2]), str(strlst[6]))
+        curs.execute(sql)
+        db.commit()
+
+        # get recipe id of the above
+        curs2 = db.cursor()
+        sql2 = "SELECT LAST_INSERT_ID()"
+        curs2.execute(sql2)
+        data = curs2.fetchone()
+        rec_id = data[0]
+        print(rec_id)
+
+        # upload utensils
+        utenlst = strlst[3].split(',')
+        for uten in utenlst:
+            try:
+                curs = db.cursor()
+                sql = "INSERT IGNORE INTO recipes_utensils (rec_id, uten_id) VALUES (" + str(rec_id) + ", " + str(uten) +")"
+                curs.execute(sql)
+                db.commit()
+            except Exception as e:
+                print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+        # upload main ingredients
+        mainlst = strlst[4].split(',')
+        for main in mainlst:
+            try:
+                id = Cache.ingred_dict.get(main.lower())
+                curs = db.cursor()
+                sql = "INSERT IGNORE INTO recipes_main (rec_id, ing_id) VALUES (" + str(rec_id) + ", " + str(id) +")"
+                curs.execute(sql)
+                db.commit()
+            except Exception as e:
+                print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+        # upload sub ingredients
+        sublst = strlst[5].split(',')
+        for sub in sublst:
+            try:
+                id = Cache.ingred_dict.get(sub.lower())
+                curs = db.cursor()
+                sql = "INSERT IGNORE INTO recipes_sub (rec_id, ing_id) VALUES (" + str(rec_id) + ", " + str(id) +")"
+                curs.execute(sql)
+                db.commit()
+            except Exception as e:
+                print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+        return "Recipe uploaded. It may take a few days for the admin to approve the recipe."
+
+    except Exception as e:
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        return "An error occurred."
 
 
 # get user db uid from chat_id

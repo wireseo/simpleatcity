@@ -9,13 +9,14 @@ import random
 TOKEN = '1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0'
 bot = telebot.TeleBot(TOKEN)
 dbhelper.cache_ingredients()
+strlst = []
 # print(Cache.ingred_dict)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     msg = bot.reply_to(message, 'Welcome to Simpleatcity!\n\n' + inspect.cleandoc(
         """
-        Before I can start recommending simple dishes for you,
+        Before I can start redommending simple dishes for you,
         if you want better-tailored dishes, please head on to
         /myinfo to start your initial setup. If you want to
         get a recipe right away that can be made from several
@@ -106,7 +107,6 @@ def determine_type(message):
     else:
         add_ingredients(message)
 
-
 def add_likes(message):
     chat_id = message.chat.id
     text = message.text.lower()
@@ -138,8 +138,8 @@ def add_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
     ingredlst = text[2:].split(",")
-    dbhelper.add_ingredients_to_user(chat_id, ingredlst)
-    bot.reply_to(message, "Ingredients added.")
+    str = dbhelper.add_ingredients_to_user(chat_id, ingredlst)
+    bot.reply_to(message, str)
 
 
 # Handles the case where something is removed
@@ -187,8 +187,8 @@ def remove_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
     ingredlst = text[2:].split(",")
-    dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
-    bot.reply_to(message, "Ingredients removed.")
+    str = dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
+    bot.reply_to(message, str)
 
 
 # User prompted to enter & view basic information
@@ -289,6 +289,113 @@ def send_preferences(message):
     "To un-like categories, type in a list of category ids with a '-L' in front of it.\n\n" +
     "To dislike categories, the keyword is '+D'. To un-dislike, the keyword is '-D'."
     "\n\nDo not attempt to remove and add at the same time.", parse_mode='Markdown')
+
+
+# user can upload their own recipes
+@bot.message_handler(commands=['upload'])
+def ask_recipe_name(message):
+    print(strlst)
+    rec_name = bot.reply_to(message, inspect.cleandoc("""
+        Please enter the name of the recipe."""))
+    bot.register_next_step_handler(rec_name, ask_recipe_cat)
+
+def ask_recipe_cat(message):
+    print(strlst)
+    if len(strlst) == 0:
+        strlst.append(message.text) # recipe name [0]
+    all_cats = dbhelper.get_all_categories()
+    cat = bot.reply_to(message, "Please enter the index of the category this recipe belongs to.\n\nAll Categories: \n{}".format(all_cats))
+    bot.register_next_step_handler(cat, ask_recipe_diet)
+
+def ask_recipe_diet(message):
+    print(strlst)
+    if not message.text.isdigit():
+        bot.reply_to(message, "Please check your input and retry.")
+        ask_recipe_cat(message)
+    else:
+        if len(strlst) == 1:
+            strlst.append(message.text) # category index [1]
+        diet = bot.reply_to(message, inspect.cleandoc("""
+            Please enter the index of the dietary restriction of the recipe.\n\n   0. Vegetarian\n   1. Vegan\n   2. Non-vegetarian"""))
+        bot.register_next_step_handler(diet, ask_uten)
+
+def ask_uten(message):
+    print(strlst)
+    if message.text.isdigit() and (int(message.text) == 0 or int(message.text) == 1 or int(message.text) == 2):
+        if len(strlst) == 2:
+            strlst.append(message.text) # diet index [2]
+        all_utensils = dbhelper.get_all_utensils()
+        uten = bot.reply_to(message, "Please enter any necessary utensils for the recipe.\n\n*Available Utensils:* \n\t\t{}\n\nMake sure that each is separated with a comma without spaces in between (e.g. 1,2).".format(all_utensils))
+        bot.register_next_step_handler(uten, ask_main_ing)
+    else:
+        bot.reply_to(message, "Please check your input and retry.")
+        ask_recipe_diet(message)
+
+def ask_main_ing(message):
+    print(strlst)
+    if len(strlst) == 3:
+        strlst.append(message.text) # "list" of uten index [3]
+    main_ing = bot.reply_to(message, inspect.cleandoc("""
+        Please enter the main ingredients of the recipe. They should be absolutely
+integral to the recipe (i.e. recipe cannot be attempted without them).\n
+Make sure that each is separated with a comma and are in singular form
+without spaces in between (e.g. avocado,soymilk,lettuce).\n
+If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+    bot.register_next_step_handler(main_ing, ask_sub_ing)
+
+def ask_sub_ing(message):
+    print(strlst)
+    text = message.text.lower()
+    ingredlst = text[0:].split(",")
+    contin = True
+    for ingred in ingredlst:
+        id = Cache.ingred_dict.get(ingred)
+        if id == None:
+            bot.reply_to(message, "Please check your input and retry. One or more ingredients are not recognized.")
+            contin = False
+            break
+    if not contin:
+        ask_main_ing(message)
+    else:
+        if len(strlst) == 4:
+            strlst.append(message.text) # "list" of main ing names [4]
+        sub_ing = bot.reply_to(message, inspect.cleandoc("""
+            Please enter the sub ingredients of the recipe. They should be ingredients
+that are not strictly necessary to the recipe (i.e. recipe still can be attempted without them).\n
+Make sure that each is separated with a comma and are in singular form without spaces in between (e.g. avocado,soymilk,lettuce).\n
+If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+        bot.register_next_step_handler(sub_ing, ask_instructions)
+
+def ask_instructions(message):
+    print(strlst)
+    text = message.text.lower()
+    ingredlst = text[0:].split(",")
+    contin = True
+    for ingred in ingredlst:
+        id = Cache.ingred_dict.get(ingred)
+        if id == None:
+            strlst.clear()
+            bot.reply_to(message, "Please check your input and retry. One or more ingredients are not recognized.")
+            contin = False
+            break
+    if not contin:
+        ask_sub_ing(message)
+    else:
+        if len(strlst) == 5:
+            strlst.append(message.text) # "list" of sub ing names [5]
+        instructions = bot.reply_to(message, inspect.cleandoc("""
+            Please enter instructions for the recipe. You can either paste a link
+to the recipe or type it out in a list format. For the latter, make
+sure you number the steps and outline the process as clearly as possible."""))
+        bot.register_next_step_handler(instructions, upload_recipe)
+
+def upload_recipe(message):
+    print(strlst)
+    strlst.append(message.text) # link or recipe instructions [6]
+    print(strlst)
+    bot.reply_to(message, "Please wait until the recipe is uploaded.")
+    str = dbhelper.upload_recipe(strlst)
+    bot.reply_to(message, str)
 
 
 # user prompted to manually enter available ingredients
