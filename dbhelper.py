@@ -41,8 +41,6 @@ def get_quickrecipe(ing_name_str):
         if len(final_quickrec) == 0:
             return 'norec'
         else:
-            # return get_random(final_quickrec)
-            # print(final_quickrec)
             return final_quickrec
     except Exception as e:
         print("An exception of type {0} occurred while retrieving quickrecipe."
@@ -51,10 +49,10 @@ def get_quickrecipe(ing_name_str):
 
 
 # get recipe based on user information
-def get_recipe(user):
+def get_recipe(user_id):
     try:
         # retrieve list of user's ingredients
-        ingredients = get_ingredients_from_user(user)
+        ingredients = get_ingredients_from_user(user_id)
         # concatenate list of ingredients id into a string
         ing_id_str = ','.join(map(str, ingredients))
         # find all available recipes based on ingredients
@@ -65,7 +63,7 @@ def get_recipe(user):
             FROM
                 recipes AS r
             JOIN recipes_main AS mi ON r.rec_id = mi.rec_id
-            JOIN ingredients AS i ON mi.ing_id = i.ing_i
+            JOIN ingredients AS i ON mi.ing_id = i.ing_id
             LEFT JOIN recipes_main AS noIng ON r.rec_id = noIng.rec_id
                 AND noIng.ing_id NOT IN ({})
             WHERE i.ing_id IN ({})
@@ -74,11 +72,11 @@ def get_recipe(user):
         rec_by_ing = curs.fetchall()
         # if no recipe exists
         if len(rec_by_ing) == 0:
-            return 'No recipe found :('
+            return 'norec_ing'
         rec_by_ing_str = query_result_to_str(rec_by_ing)
 
         # retrieve list of user's utensils
-        utensils = get_utensils_from_user(user)
+        utensils = get_utensils_from_user(user_id)
         # concatenate list of utensils id into a string
         ute_id_str = ','.join(map(str, utensils))
         # find all available recipes based on utensils
@@ -98,33 +96,49 @@ def get_recipe(user):
         rec_by_ute = curs.fetchall()
         # if no recipe exists
         if len(rec_by_ing) == 0:
-            return 'No recipe found :('
+            return 'norec_ute'
         rec_by_ute_str = query_result_to_str(rec_by_ute)
 
         # retrieve user's diet
-        diet = get_diet_from_user(user)
+        diet = get_diet_from_user(user_id)
         # convert diet_id to a string
         diet_id_str = str(diet[0])
-        # find all available recipes based on ingreidents, utensils, and diet
+        # process diet_id to include all available diet
+        processed_diet_id_str = process_diet(diet_id_str)
+        # retrieve list of user's disliked categories
+        dislikes = get_dislikes_from_user(user_id)
+        # concatenate list of utensils id into a string
+        dislikes_id_str = ','.join(map(str, dislikes))
+
+        # find all available recipes based on ingreidents, utensils, diet, and preferences
         curs = db.cursor()
         sql = """
         SELECT * FROM recipes r
-            WHERE diet = {}
+            WHERE diet IN ({})
                 AND rec_id IN ({})
                 AND rec_id IN ({});
-        """.format(diet_id_str, rec_by_ing_str, rec_by_ute_str)
+        """.format(processed_diet_id_str, rec_by_ing_str, rec_by_ute_str)
         curs.execute(sql)
         final_rec = curs.fetchall()
         # if no recipe exists
         if len(final_rec) == 0:
-            return 'No recipe found :('
+            return 'norec'
         else:
-            # plz don't forget to fix!!!
-            # return get_random(final_rec)
-            return
+            return final_rec
     except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
-        return 'Sorry, an unexpected error has occured. Please try again :('
+        print("An exception of type {0} occurred while retrieving recipe."
+        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        return 'error'
+
+
+# process diet_id to include all available diet
+def process_diet(diet_id):
+    if diet_id == "0":
+        return "0"
+    elif diet_id == "1":
+        return "0, 1"
+    elif diet_id == "2":
+        return "0, 1, 2"
 
 
 # convert ingredient name to ingredient id
@@ -199,15 +213,16 @@ def get_diet(chat_id):
 
 
 # retrieve user's diet from user information
-def get_diet_from_user(user):
+def get_diet_from_user(user_id):
     try:
         curs = db.cursor()
-        sql = "SELECT diet FROM users WHERE user_id = {}".format(user)
+        sql = "SELECT diet FROM users WHERE id = {}".format(user_id)
         curs.execute(sql)
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving diet from user."
+        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's list of ingredients
@@ -226,16 +241,17 @@ def get_ingredients(chat_id):
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
-# retrieve a list of ingredient_id from user information
-def get_ingredients_from_user(user):
+# retrieve ingredients with user_id
+def get_ingredients_from_user(user_id):
     try:
         curs = db.cursor()
-        sql = "SELECT ing_id FROM users a JOIN users_ingredients b ON a.id = b.user_id WHERE a.user_id = {}".format(user)
+        sql = "SELECT ing_id FROM users_ingredients WHERE user_id = {}".format(user_id)
         curs.execute(sql)
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving ingredients from user."
+        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's list of utensils
@@ -275,16 +291,17 @@ def get_all_utensils():
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
-# retrieve user's utensils from user information
-def get_utensils_from_user(user):
+# retrieve user's utensils with user_id
+def get_utensils_from_user(user_id):
     try:
         curs = db.cursor()
-        sql = "SELECT uten_id FROM users a JOIN users_utensils b ON a.id = b.user_id WHERE a.user_id = {}".format(user)
+        sql = "SELECT uten_id FROM users_utensils WHERE user_id = {}".format(user_id)
         curs.execute(sql)
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving utensils from user."
+        + "Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's likes
@@ -303,7 +320,7 @@ def get_likes(chat_id):
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
-# retrieve user's dislikes
+# retrieve user's dislikes with user_id
 def get_dislikes(chat_id):
     try:
         curs = db.cursor()
@@ -317,6 +334,19 @@ def get_dislikes(chat_id):
             return data
     except Exception as e:
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# retrieve user's dislikes from user information
+def get_dislikes_from_user(user_id):
+    try:
+        curs = db.cursor()
+        sql = "SELECT cat_id FROM users_dislikes WHERE user_id = {}".format(user_id)
+        curs.execute(sql)
+        data = curs.fetchall()
+        return [x[0] for x in data]
+    except Exception as e:
+        print("An exception of type {0} occurred while retrieving utensils from user."
+        + "Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve all categories
@@ -557,44 +587,54 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
 
 # add the recipe to the user's liked list
 def like_recipe(msg):
-    chat_id = msg.chat.id
-    user_id = get_uid_with_chat_id(chat_id)
+    user_id = get_uid_with_chat_id(msg.chat.id)
     try:
         curs = db.cursor()
         # check if the recipe is already in disliked list
-        sql_check = "SELECT EXISTS(SELECT * FROM users_disliked WHERE user_id = {})".format(user_id)
+        sql_check = """SELECT EXISTS
+            (SELECT
+                *
+            FROM
+                users_disliked
+            WHERE user_id = {}
+                AND rec_id = {})""".format(user_id, Cache.rec_tup_dict[user_id][0])
         curs.execute(sql_check)
         duplicate = curs.fetchall()
         if duplicate[0][0] == 1:
-            return 'You have already added "{}" to your disliked list :(\n\nPlease remove it from your disliked list before adding it to your liked list'.format(str(Cache.rec_tup_dict[chat_id][1]))
-        sql_like = "INSERT IGNORE INTO users_liked (user_id, rec_id) VALUES (" + str(user_id) + ", " + str(Cache.rec_tup_dict[chat_id][0]) +")"
+            return 'You have already added "{}" to your disliked list :(\nPlease remove it from your disliked list before adding it to your liked list!'.format(str(Cache.rec_tup_dict[user_id][1]))
+        sql_like = "INSERT IGNORE INTO users_liked (user_id, rec_id) VALUES ({}, {})".format(str(user_id), str(Cache.rec_tup_dict[user_id][0]))
         curs.execute(sql_like)
         db.commit()
+        return 'You have successfully added "{}" to your liked list :)'.format(str(Cache.rec_tup_dict[user_id][1]))
     except Exception as e:
         print("An exception of type {0} occurred while adding recipe to liked list."
         + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
-    return 'You have successfully added "{}" to your liked list :)'.format(str(Cache.rec_tup_dict[chat_id][1]))
 
 
 # add the recipe to the user's liked list
 def dislike_recipe(msg):
-    chat_id = msg.chat.id
-    user_id = get_uid_with_chat_id(chat_id)
+    user_id = get_uid_with_chat_id(msg.chat.id)
     try:
         curs = db.cursor()
         # check if the recipe is already in disliked list
-        sql_check = "SELECT EXISTS(SELECT * FROM users_liked WHERE user_id = {})".format(user_id)
+        sql_check = """SELECT EXISTS
+            (SELECT
+                *
+            FROM
+                users_liked
+            WHERE user_id = {}
+                AND rec_id = {})""".format(user_id, Cache.rec_tup_dict[user_id][0])
         curs.execute(sql_check)
         duplicate = curs.fetchall()
         if duplicate[0][0] == 1:
-            return 'You have already added "{}" to your liked list :(\n\nPlease remove it from your liked list before adding it to your disliked list'.format(str(Cache.rec_tup_dict[chat_id][1]))
-        sql_like = "INSERT IGNORE INTO users_disliked (user_id, rec_id) VALUES (" + str(user_id) + ", " + str(Cache.rec_tup_dict[chat_id][0]) +")"
+            return 'You have already added "{}" to your liked list :(\nPlease remove it from your liked list before adding it to your disliked list!'.format(str(Cache.rec_tup_dict[user_id][1]))
+        sql_like = "INSERT IGNORE INTO users_disliked (user_id, rec_id) VALUES ({}, {})".format(str(user_id), str(Cache.rec_tup_dict[user_id][0]))
         curs.execute(sql_like)
         db.commit()
+        return 'You have successfully added "{}" to your disliked list :)'.format(str(Cache.rec_tup_dict[user_id][1]))
     except Exception as e:
         print("An exception of type {0} occurred while adding recipe to disliked list."
         + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
-    return 'You have successfully added "{}" to your disliked list :)'.format(str(Cache.rec_tup_dict[chat_id][1]))
 
 
 # add a new recipe
@@ -658,7 +698,7 @@ def upload_recipe(strlst):
 # get user db uid from chat_id
 def get_uid_with_chat_id(chat_id):
     curs = db.cursor()
-    sql = "SELECT id FROM users WHERE user_id = " + str(chat_id)
+    sql = "SELECT id FROM users WHERE user_id = {}".format(chat_id)
     curs.execute(sql)
     return curs.fetchone()[0]
 

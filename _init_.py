@@ -68,9 +68,9 @@ def send_help(message):
 
 
 # Handles the case where only recipe id is entered
-@bot.message_handler(regexp="^0*[1-9]\d*$")
-def send_rec_by_rec_id(message):
-    bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
+# @bot.message_handler(regexp="^0*[1-9]\d*$")
+# def send_rec_by_rec_id(message):
+#     bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
 
 
 # Handles the case where diet is to be changed
@@ -411,29 +411,41 @@ def ask_ingredients(message):
 
 # suggest recipe based on given ingredients
 def send_quickrecipe(ingredients):
-    chat_id = ingredients.chat.id
+    user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipe = dbhelper.get_quickrecipe(ingredients.text)
     if recipe == 'norec':
         bot.reply_to(ingredients, 'No recipe found :(')
     elif recipe == 'error':
-        bot.reply_to(ingredients, 'Sorry, an unexpected error has occured. Please try again :(')
+        bot.reply_to(ingredients, 'Sorry, an unexpected error has occured.\nPlease try again :(')
     else:
         # set the global variable to store list of recipe
-        Cache.rec_list_dict[chat_id] = recipe
+        Cache.rec_list_dict[user_id] = recipe
         gen_recipe(ingredients, recipe)
 
 
 # user given recipe based on user information
 @bot.message_handler(commands=['recipe'])
-def ask_recipe(message):
-    chat_id = message.chat.id
-    recipe = dbhelper.get_recipe(chat_id)
-    bot.reply_to(message, recipe)
+def send_recipe(message):
+    user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
+    recipe = dbhelper.get_recipe(user_id)
+    #
+    if recipe == 'norec':
+        bot.reply_to(message, 'No recipe found :(')
+    elif recipe == 'norec_ing':
+        bot.reply_to(message, 'No recipe found :(\nPlease add more ingredients.')
+    elif recipe == 'norec_ute':
+        bot.reply_to(message, 'No recipe found :(\nPlease add more utensils.')
+    elif recipe == 'error':
+        bot.reply_to(message, 'Sorry, an unexpected error has occured.\nPlease try again :(')
+    else:
+        # set the global variable to store list of recipe
+        Cache.rec_list_dict[user_id] = recipe
+        gen_recipe(message, recipe)
 
 
 # process response from user 1) like 2) dislike 3) another
 def process_callback(cb):
-    chat_id = cb.chat.id
+    user_id = dbhelper.get_uid_with_chat_id(cb.chat.id)
     if cb.text == u'\U0001F44D Like':
         # function to add recipe to like list
         return bot.reply_to(cb, dbhelper.like_recipe(cb))
@@ -441,7 +453,7 @@ def process_callback(cb):
         # function to add recipe to dislike list
         return bot.reply_to(cb, dbhelper.dislike_recipe(cb))
     elif cb.text == u'\U0001F64F Show me another recipe':
-        return gen_recipe(cb, Cache.rec_list_dict[chat_id])
+        return gen_recipe(cb, Cache.rec_list_dict[user_id])
     # elif cb.text == u'\U0000274C Cancel':
     #     return
     else:
@@ -451,7 +463,7 @@ def process_callback(cb):
 
 # show another recipe to the user
 def gen_recipe(message, recipe_list):
-    chat_id = message.chat.id
+    user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     itembtn_like = types.KeyboardButton('\U0001F44D Like')
     itembtn_dislike = types.KeyboardButton('\U0001F44E Dislike')
@@ -461,8 +473,8 @@ def gen_recipe(message, recipe_list):
     markup.row(itembtn_another)
     markup.row(itembtn_cancel)
     rand_idx = get_random_index(recipe_list)
-    Cache.rec_list_dict[chat_id] = recipe_list
-    Cache.rec_tup_dict[chat_id] = recipe_list[rand_idx]
+    Cache.rec_list_dict[user_id] = recipe_list
+    Cache.rec_tup_dict[user_id] = recipe_list[rand_idx]
     rand_rec = get_random_recipe_str(recipe_list, rand_idx)
     callback = bot.reply_to(message, rand_rec, reply_markup=markup)
     bot.register_next_step_handler(callback, process_callback)
@@ -474,7 +486,7 @@ def get_random_index(input):
 
 
 def get_random_recipe_str(input, idx):
-    return 'Would you like to try "{}"?\n {}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
+    return 'Would you like to try "{}"?\n{}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
 
 bot.enable_save_next_step_handlers(delay=2)
 bot.load_next_step_handlers()
