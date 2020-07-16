@@ -15,7 +15,8 @@ dbhelper.cache_ingredients()
 strlst = []
 # print(Cache.ingred_dict)
 
-@bot.message_handler(commands=['start'])
+# @bot.message_handler(commands=['start'])
+@bot.route('/command ?(.*)')
 def send_welcome(message):
     msg = bot.reply_to(message, 'Welcome to Simpleatcity!\n\n' + inspect.cleandoc(
         """
