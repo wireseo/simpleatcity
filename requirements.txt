@@ -1,0 +1,15 @@
+click==7.1.2
+Flask==1.1.2
+itsdangerous==1.1.0
+Jinja2==2.11.2
+MarkupSafe==1.1.1
+numpy==1.19.0
+pandas==1.0.5
+PyMySQL==0.9.3
+pyTelegramBotAPI==3.7.2
+python-dateutil==2.8.1
+pytz==2020.1
+requests==2.7.0
+six==1.15.0
+telebot==0.0.3
+Werkzeug==1.0.1
