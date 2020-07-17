@@ -601,7 +601,7 @@ def like_recipe(msg):
         curs.execute(sql_check)
         duplicate = curs.fetchall()
         if duplicate[0][0] == 1:
-            return 'You have already added "{}" to your disliked list :(\nPlease remove it from your disliked list before adding it to your liked list!'.format(str(Cache.rec_tup_dict[user_id][1]))
+            return 'You have already added "{}" to your disliked list :(\nPlease remove it before adding it to your liked list!'.format(str(Cache.rec_tup_dict[user_id][1]))
         sql_like = "INSERT IGNORE INTO users_liked (user_id, rec_id) VALUES ({}, {})".format(str(user_id), str(Cache.rec_tup_dict[user_id][0]))
         curs.execute(sql_like)
         db.commit()
@@ -627,7 +627,7 @@ def dislike_recipe(msg):
         curs.execute(sql_check)
         duplicate = curs.fetchall()
         if duplicate[0][0] == 1:
-            return 'You have already added "{}" to your liked list :(\nPlease remove it from your liked list before adding it to your disliked list!'.format(str(Cache.rec_tup_dict[user_id][1]))
+            return 'You have already added "{}" to your liked list :(\nPlease remove it before adding it to your disliked list!'.format(str(Cache.rec_tup_dict[user_id][1]))
         sql_like = "INSERT IGNORE INTO users_disliked (user_id, rec_id) VALUES ({}, {})".format(str(user_id), str(Cache.rec_tup_dict[user_id][0]))
         curs.execute(sql_like)
         db.commit()
