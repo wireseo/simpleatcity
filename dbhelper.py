@@ -13,7 +13,7 @@ db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.am
                         charset='utf8')
 
 # get recipe based on ingredient input
-def get_quickrecipe(ing_name_str):
+def get_quickrecipes(ing_name_str):
     try:
         curs = db.cursor()
         # split ingredients_name to a list of ingredients_name
@@ -49,7 +49,7 @@ def get_quickrecipe(ing_name_str):
 
 
 # get recipe based on user information
-def get_recipe(user_id):
+def get_recipes(user_id):
     try:
         # retrieve list of user's ingredients
         ingredients = get_ingredients_from_user(user_id)

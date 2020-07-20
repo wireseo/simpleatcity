@@ -71,9 +71,9 @@ def send_help(message):
 
 
 # Handles the case where only recipe id is entered
-# @bot.message_handler(regexp="^0*[1-9]\d*$")
-# def send_rec_by_rec_id(message):
-#     bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
+@bot.message_handler(regexp="^0*[1-9]\d*$")
+def send_rec_by_rec_id(message):
+    bot.reply_to(message, dbhelper.get_recipe_with_id(message.text))
 
 
 # Handles the case where diet is to be changed
@@ -415,7 +415,7 @@ def ask_ingredients(message):
 # suggest recipe based on given ingredients
 def send_quickrecipe(ingredients):
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
-    recipe = dbhelper.get_quickrecipe(ingredients.text)
+    recipe = dbhelper.get_quickrecipes(ingredients.text)
     if recipe == 'norec':
         bot.reply_to(ingredients, 'No recipe found :(')
     elif recipe == 'error':
@@ -430,7 +430,7 @@ def send_quickrecipe(ingredients):
 @bot.message_handler(commands=['recipe'])
 def send_recipe(message):
     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
-    recipe = dbhelper.get_recipe(user_id)
+    recipe = dbhelper.get_recipes(user_id)
     #
     if recipe == 'norec':
         bot.reply_to(message, 'No recipe found :(')
