@@ -29,7 +29,6 @@ def send_welcome(message):
 
     try:
         chat_id = message.chat.id
-        user = User(chat_id)
 
         # if user does not exist in db, insert new User
         is_new_user = dbhelper.add_user(chat_id)
