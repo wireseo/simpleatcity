@@ -371,17 +371,17 @@ def get_all_categories():
 
 
 # retrieve user's number of dishes rated
-def get_num_rated(chat_id):
-    try:
-        curs = db.cursor()
-        sql = "SELECT (num_rated) FROM users WHERE (user_id) = '" + str(chat_id) + "'"
-        curs.execute(sql)
-        data = curs.fetchone()
-        if data == None:
-            print("Nope - num rated")
-        return data[0]
-    except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+# def get_num_rated(chat_id):
+#     try:
+#         curs = db.cursor()
+#         sql = "SELECT (num_rated) FROM users WHERE (user_id) = '" + str(chat_id) + "'"
+#         curs.execute(sql)
+#         data = curs.fetchone()
+#         if data == None:
+#             print("Nope - num rated")
+#         return data[0]
+#     except Exception as e:
+#         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's list of recipes uploaded

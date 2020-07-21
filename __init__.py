@@ -19,9 +19,9 @@ strlst = []
 def send_welcome(message):
     msg = bot.reply_to(message, 'Welcome to Simpleatcity!\n\n' + inspect.cleandoc(
         """
-        Before I can start redommending simple dishes for you,
+        Before I can start recommending simple dishes for you,
         if you want better-tailored dishes, please head on to
-        /myinfo to start your initial setup. If you want to
+        /myinfo to start your initial setup. If you want to.
         get a recipe right away that can be made from several
         main ingredients that you have, head on to /quickrecipe.
         For a more detailed overview of the functionalities that this
@@ -204,7 +204,7 @@ def send_myinfo(message):
         utensils = dbhelper.get_utensils(chat_id)
         likes = dbhelper.get_likes(chat_id)
         dislikes = dbhelper.get_dislikes(chat_id)
-        num_rated = dbhelper.get_num_rated(chat_id)
+        # num_rated = dbhelper.get_num_rated(chat_id)
         uploaded = dbhelper.get_recipes_uploaded(chat_id)
         liked = dbhelper.get_recipes_liked(chat_id)
 
@@ -214,7 +214,6 @@ def send_myinfo(message):
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*# of Recipes Rated:* {}\n\n".format(num_rated) +
             "*Recipes Uploaded:* \n\t\t{}\n\n".format(uploaded) +
             "*Recipes Liked:* \n\t\t{}\n".format(liked) +
             "\nTo access the recipes above, type in the recipe id (i.e. number" +
