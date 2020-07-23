@@ -500,7 +500,7 @@ def callback_query(call):
     elif call.data == "cb_no":
         bot.answer_callback_query(call.id, "Answer is No")
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['test'])
 def message_handler(message):
     bot.send_message(message.chat.id, "Yes/no?", reply_markup=gen_markup())
 #####
