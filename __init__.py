@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 import inspect
 from enums import Diet
-from classes import Cache
+from cache import Cache
 import dbhelper
 import random
 
@@ -204,9 +204,9 @@ def send_myinfo(message):
         utensils = dbhelper.get_utensils(chat_id)
         likes = dbhelper.get_likes(chat_id)
         dislikes = dbhelper.get_dislikes(chat_id)
-        # num_rated = dbhelper.get_num_rated(chat_id)
         uploaded = dbhelper.get_recipes_uploaded(chat_id)
         liked = dbhelper.get_recipes_liked(chat_id)
+        disliked = dbhelper.get_recipes_disliked(chat_id)
 
         msg = bot.reply_to(message,
             "*Dietary Preference:* \n{}\n\n".format(diet) +
@@ -214,8 +214,9 @@ def send_myinfo(message):
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Recipes Uploaded:* \n{}\n\n".format(uploaded) +
-            "*Recipes Liked:* \n{}\n".format(liked) +
+            "*Recipes Disliked:* \n\t\t{}\n".format(disliked) +
+            "*Recipes Liked:* \n\t\t{}\n\t".format(liked) +
+            "*Recipes Uploaded:* \n\t\t{}\n\n\t".format(uploaded) +
             "\nTo access the recipes above, type in the recipe id (i.e. number" +
             " displayed before recipe name). You can only prompt for one recipe at a time.\n" +
             "\nTo maintain ingredients, go to /ingredients. To maintain" +
