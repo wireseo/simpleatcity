@@ -495,7 +495,7 @@ def get_random_recipe_str(input, idx):
 
 def gen_markup_recipe():
     markup_recipe = InlineKeyboardMarkup()
-    markup_recipe.row_width = 2
+    markup_recipe.row_width = 1
     markup_recipe.add(InlineKeyboardButton("\U00002764 Add to favourites", callback_data="cb_fav"),
         InlineKeyboardButton("\U0001F500 Show another recipe", callback_data="cb_another"),
         InlineKeyboardButton("\U0000274C Cancel", callback_data="cb_cancel"))
@@ -504,15 +504,15 @@ def gen_markup_recipe():
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     print(call)
-    user_id = dbhelper.get_uid_with_chat_id(call.from_sender)
+    user_id = dbhelper.get_uid_with_chat_id(call.from_user.id)
     if call.data == "cb_fav":
-        result = dbhelper.add_to_fav(call)
-        bot.answer_callback_query(call.id, result)
+        bot.answer_callback_query(call.id, "\U00002764 Add to favourites")
+        bot.reply_to(call.message, dbhelper.add_to_fav(call))
     elif call.data == "cb_another":
-        bot.answer_callback_query(call.id, "Here is another recipe for you.")
-        return gen_recipe(call.message, Cache.rec_list_dict[user_id])
+        bot.answer_callback_query(call.id, "\U0001F500 Show another recipe")
+        gen_recipe(call.message, Cache.rec_list_dict[user_id])
     elif call.data == "cb_cancel":
-        bot.answer_callback_query(call.id, "Cancel any further actions.")
+        bot.answer_callback_query(call.id, "\U0000274C Cancel")
 
 #####
 def gen_markup():

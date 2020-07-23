@@ -599,7 +599,7 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
 
 # add the recipe to the user's liked list
 def add_to_fav(call):
-    user_id = get_uid_with_chat_id(call.from_user)
+    user_id = get_uid_with_chat_id(call.from_user.id)
     try:
         curs = db.cursor()
         # check if the recipe is already in disliked list
