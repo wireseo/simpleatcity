@@ -1,8 +1,8 @@
 import os
 from flask import Flask, request
 import telebot
-from telebot import types as tt
-from tt import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot import types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import inspect
 from enums import Diet
 from cache import Cache
