@@ -454,7 +454,7 @@ def process_callback(cb):
     elif cb.text == u'\U0001F500 Show another recipe':
         return gen_recipe(cb, Cache.rec_list_dict[user_id])
     elif cb.text == u'\U0000274C Cancel':
-    #     return
+         return
     else:
         # default
         return
