@@ -43,8 +43,7 @@ def get_quickrecipes(ing_name_str):
         else:
             return final_quickrec
     except Exception as e:
-        print("An exception of type {0} occurred while retrieving quickrecipe."
-        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving quickrecipe. Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'error'
 
 
@@ -126,8 +125,7 @@ def get_recipes(user_id):
         else:
             return final_rec
     except Exception as e:
-        print("An exception of type {0} occurred while retrieving recipe."
-        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving recipe. Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'error'
 
 
@@ -159,8 +157,7 @@ def ing_name_to_id(ing_name_):
         # return first column 'ing_id'
         return ing_row[0]
     except Exception as e:
-        print("An exception of type {0} occurred while retrieving recipe."
-        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving recipe. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # display all recipes
@@ -221,8 +218,7 @@ def get_diet_from_user(user_id):
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        print("An exception of type {0} occurred while retrieving diet from user."
-        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving diet from user. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's list of ingredients
@@ -250,8 +246,7 @@ def get_ingredients_from_user(user_id):
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        print("An exception of type {0} occurred while retrieving ingredients from user."
-        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving ingredients from user. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's list of utensils
@@ -300,8 +295,7 @@ def get_utensils_from_user(user_id):
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        print("An exception of type {0} occurred while retrieving utensils from user."
-        + "Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving utensils from user. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's likes
@@ -345,8 +339,7 @@ def get_dislikes_from_user(user_id):
         data = curs.fetchall()
         return [x[0] for x in data]
     except Exception as e:
-        print("An exception of type {0} occurred while retrieving dislikes from user."
-        + "Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving dislikes from user. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve all categories
@@ -403,15 +396,15 @@ def get_recipes_uploaded(chat_id):
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
-# retrieve user's list of recipes liked
-def get_recipes_liked(chat_id):
+# retrieve user's favourites
+def get_fav(chat_id):
     try:
         curs = db.cursor()
         sql = "SELECT B.rec_name, B.rec_id FROM users_fav A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
         curs.execute(sql)
         data = curs.fetchall()
         if not data:
-            print("Nope - recipes liked" + str(data))
+            print("Nope - favourites" + str(data))
         else:
             newdata = []
             for i, (name, id) in enumerate(data):
@@ -419,26 +412,26 @@ def get_recipes_liked(chat_id):
             newdata = '\n\t\t'.join(newdata)
             return newdata
     except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while retrieving favourites. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # retrieve user's list of recipes liked
-def get_recipes_disliked(chat_id):
-    try:
-        curs = db.cursor()
-        sql = "SELECT B.rec_name, B.rec_id FROM users_disliked A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
-        curs.execute(sql)
-        data = curs.fetchall()
-        if not data:
-            print("Nope - recipes disliked" + str(data))
-        else:
-            newdata = []
-            for i, (name, id) in enumerate(data):
-                newdata.append((str(id) + ". " + str(name)))
-            newdata = '\n\t\t'.join(newdata)
-            return newdata
-    except Exception as e:
-        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+# def get_recipes_disliked(chat_id):
+#     try:
+#         curs = db.cursor()
+#         sql = "SELECT B.rec_name, B.rec_id FROM users_disliked A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
+#         curs.execute(sql)
+#         data = curs.fetchall()
+#         if not data:
+#             print("Nope - recipes disliked" + str(data))
+#         else:
+#             newdata = []
+#             for i, (name, id) in enumerate(data):
+#                 newdata.append((str(id) + ". " + str(name)))
+#             newdata = '\n\t\t'.join(newdata)
+#             return newdata
+#     except Exception as e:
+#         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # update user's dietary status
@@ -627,8 +620,7 @@ def add_to_fav(msg):
             db.commit()
             return '\U0001F44D You have successfully added "{}" to your favourites'.format(str(Cache.rec_tup_dict[user_id][1]))
     except Exception as e:
-        print("An exception of type {0} occurred while adding recipe to favourites."
-        + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+        print("An exception of type {0} occurred while adding recipe to favourites. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # # add the recipe to the user's liked list
@@ -653,8 +645,7 @@ def add_to_fav(msg):
 #         db.commit()
 #         return 'You have successfully added "{}" to your disliked list :)'.format(str(Cache.rec_tup_dict[user_id][1]))
 #     except Exception as e:
-#         print("An exception of type {0} occurred while adding recipe to disliked list."
-#         + " Arguments:\n{1!r}".format(type(e).__name__, e.args))
+#         print("An exception of type {0} occurred while adding recipe to disliked list. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # add a new recipe

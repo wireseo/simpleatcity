@@ -205,8 +205,7 @@ def send_myinfo(message):
         likes = dbhelper.get_likes(chat_id)
         dislikes = dbhelper.get_dislikes(chat_id)
         uploaded = dbhelper.get_recipes_uploaded(chat_id)
-        liked = dbhelper.get_recipes_liked(chat_id)
-        disliked = dbhelper.get_recipes_disliked(chat_id)
+        fav = dbhelper.get_recipes_liked(chat_id)
 
         msg = bot.reply_to(message,
             "*Dietary Preference:* \n{}\n\n".format(diet) +
@@ -214,9 +213,8 @@ def send_myinfo(message):
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Recipes Disliked:* \n\t\t{}\n".format(disliked) +
-            "*Recipes Liked:* \n\t\t{}\n\t".format(liked) +
-            "*Recipes Uploaded:* \n\t\t{}\n\n\t".format(uploaded) +
+            "*Favourites:* \n\t\t{}\n\n".format(liked) +
+            "*Recipes Uploaded:* \n\t\t{}\n\n".format(uploaded) +
             "\nTo access the recipes above, type in the recipe id (i.e. number" +
             " displayed before recipe name). You can only prompt for one recipe at a time.\n" +
             "\nTo maintain ingredients, go to /ingredients. To maintain" +
@@ -416,9 +414,9 @@ def send_quickrecipe(ingredients):
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipe = dbhelper.get_quickrecipes(ingredients.text)
     if recipe == 'norec':
-        bot.reply_to(ingredients, 'No recipe found :(')
+        bot.reply_to(ingredients, '\U0001F645 No recipe found')
     elif recipe == 'error':
-        bot.reply_to(ingredients, 'Sorry, an unexpected error has occured.\nPlease try again :(')
+        bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured.\nPlease try again.')
     else:
         # set the global variable to store list of recipe
         Cache.rec_list_dict[user_id] = recipe
@@ -432,13 +430,13 @@ def send_recipe(message):
     recipe = dbhelper.get_recipes(user_id)
     #
     if recipe == 'norec':
-        bot.reply_to(message, 'No recipe found :(')
+        bot.reply_to(message, '\U0001F645 No recipe found.')
     elif recipe == 'norec_ing':
-        bot.reply_to(message, 'No recipe found :(\nPlease add more ingredients.')
+        bot.reply_to(message, '\U0001F645 No recipe found.\nPlease add more ingredients.')
     elif recipe == 'norec_ute':
-        bot.reply_to(message, 'No recipe found :(\nPlease add more utensils.')
+        bot.reply_to(message, '\U0001F645 No recipe found.\nPlease add more utensils.')
     elif recipe == 'error':
-        bot.reply_to(message, 'Sorry, an unexpected error has occured.\nPlease try again :(')
+        bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured.\nPlease try again.')
     else:
         # set the global variable to store list of recipe
         Cache.rec_list_dict[user_id] = recipe
