@@ -447,15 +447,12 @@ def send_recipe(message):
 # process response from user 1) like 2) dislike 3) another
 def process_callback(cb):
     user_id = dbhelper.get_uid_with_chat_id(cb.chat.id)
-    if cb.text == u'\U0001F44D Like':
-        # function to add recipe to like list
-        return bot.reply_to(cb, dbhelper.like_recipe(cb))
-    elif cb.text == u'\U0001F44E Dislike':
-        # function to add recipe to dislike list
-        return bot.reply_to(cb, dbhelper.dislike_recipe(cb))
-    elif cb.text == u'\U0001F64F Show me another recipe':
+    if cb.text == u'\U00002764 Add to favourites':
+        # function to add recipe to favourites
+        return bot.reply_to(cb, dbhelper.add_to_fav(cb))
+    elif cb.text == u'\U0001F500 Show another recipe':
         return gen_recipe(cb, Cache.rec_list_dict[user_id])
-    # elif cb.text == u'\U0000274C Cancel':
+    elif cb.text == u'\U0000274C Cancel':
     #     return
     else:
         # default
@@ -466,12 +463,10 @@ def process_callback(cb):
 def gen_recipe(message, recipe_list):
     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-    itembtn_like = types.KeyboardButton('\U0001F44D Like')
-    itembtn_dislike = types.KeyboardButton('\U0001F44E Dislike')
-    itembtn_another = types.KeyboardButton('\U0001F64F Show me another recipe')
+    itembtn_like = types.KeyboardButton('\U00002764 Add to favourites')
+    itembtn_another = types.KeyboardButton('\U0001F500 Show another recipe')
     itembtn_cancel = types.KeyboardButton('\U0000274C Cancel')
-    markup.row(itembtn_like, itembtn_dislike)
-    markup.row(itembtn_another)
+    markup.row(itembtn_like, itembtn_another)
     markup.row(itembtn_cancel)
     rand_idx = get_random_index(recipe_list)
     Cache.rec_list_dict[user_id] = recipe_list
@@ -488,6 +483,7 @@ def get_random_index(input):
 
 def get_random_recipe_str(input, idx):
     return 'Would you like to try "{}"?\n{}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
+
 
 bot.enable_save_next_step_handlers(delay=2)
 bot.load_next_step_handlers()
