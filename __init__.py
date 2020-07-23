@@ -1,7 +1,8 @@
 import os
 from flask import Flask, request
 import telebot
-from telebot import types
+from telebot import types as tt
+from tt import InlineKeyboardMarkup, InlineKeyboardButton
 import inspect
 from enums import Diet
 from cache import Cache
@@ -213,11 +214,11 @@ def send_myinfo(message):
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Favourites:* \n\t\t{}\n\n".format(fav) +
-            "*Recipes Uploaded:* \n\t\t{}\n\n".format(uploaded) +
-            "\nTo access the recipes above, type in the recipe id (i.e. number" +
-            " displayed before recipe name). You can only prompt for one recipe at a time.\n" +
-            "\nTo maintain ingredients, go to /ingredients. To maintain" +
+            "*Favourites:* \n{}\n\n".format(fav) +
+            "*Recipes Uploaded:* \n{}\n\n".format(uploaded) +
+            "To access the recipes above, type in the recipe id (i.e. number " +
+            "displayed before recipe name). You can only prompt for one recipe at a time.\n\n" +
+            "To maintain ingredients, go to /ingredients. To maintain" +
             " utensils, go to /utensils. To adjust preferences, go to /preferences. To change dietary status, go to /diet."
             , parse_mode='Markdown')
 
@@ -416,7 +417,7 @@ def send_quickrecipe(ingredients):
     if recipe == 'norec':
         bot.reply_to(ingredients, '\U0001F645 No recipe found')
     elif recipe == 'error':
-        bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured.\nPlease try again.')
+        bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
     else:
         # set the global variable to store list of recipe
         Cache.rec_list_dict[user_id] = recipe
@@ -428,7 +429,7 @@ def send_quickrecipe(ingredients):
 def send_recipe(message):
     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
     recipe = dbhelper.get_recipes(user_id)
-    #
+
     if recipe == 'norec':
         bot.reply_to(message, '\U0001F645 No recipe found.')
     elif recipe == 'norec_ing':
@@ -436,14 +437,14 @@ def send_recipe(message):
     elif recipe == 'norec_ute':
         bot.reply_to(message, '\U0001F645 No recipe found.\nPlease add more utensils.')
     elif recipe == 'error':
-        bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured.\nPlease try again.')
+        bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured. Please make sure you have added all the necessary information in /myinfo.')
     else:
         # set the global variable to store list of recipe
         Cache.rec_list_dict[user_id] = recipe
         gen_recipe(message, recipe)
 
 
-# process response from user 1) like 2) dislike 3) another
+# process response from user 1)fav 2)another 3)cancel
 def process_callback(cb):
     user_id = dbhelper.get_uid_with_chat_id(cb.chat.id)
     if cb.text == u'\U00002764 Add to favourites':
@@ -482,6 +483,27 @@ def get_random_index(input):
 
 def get_random_recipe_str(input, idx):
     return 'Would you like to try "{}"?\n{}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
+
+
+#####
+def gen_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton("Yes", callback_data="cb_yes"),
+                               InlineKeyboardButton("No", callback_data="cb_no"))
+    return markup
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    if call.data == "cb_yes":
+        bot.answer_callback_query(call.id, "Answer is Yes")
+    elif call.data == "cb_no":
+        bot.answer_callback_query(call.id, "Answer is No")
+
+@bot.message_handler(commands=['start'])
+def message_handler(message):
+    bot.send_message(message.chat.id, "Yes/no?", reply_markup=gen_markup())
+#####
 
 
 bot.enable_save_next_step_handlers(delay=2)
