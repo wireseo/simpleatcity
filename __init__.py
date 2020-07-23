@@ -204,8 +204,8 @@ def send_myinfo(message):
         utensils = dbhelper.get_utensils(chat_id)
         likes = dbhelper.get_likes(chat_id)
         dislikes = dbhelper.get_dislikes(chat_id)
+        fav = dbhelper.get_fav(chat_id)
         uploaded = dbhelper.get_recipes_uploaded(chat_id)
-        fav = dbhelper.get_recipes_liked(chat_id)
 
         msg = bot.reply_to(message,
             "*Dietary Preference:* \n{}\n\n".format(diet) +
@@ -213,7 +213,7 @@ def send_myinfo(message):
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Favourites:* \n\t\t{}\n\n".format(liked) +
+            "*Favourites:* \n\t\t{}\n\n".format(fav) +
             "*Recipes Uploaded:* \n\t\t{}\n\n".format(uploaded) +
             "\nTo access the recipes above, type in the recipe id (i.e. number" +
             " displayed before recipe name). You can only prompt for one recipe at a time.\n" +
