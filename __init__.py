@@ -209,13 +209,13 @@ def send_myinfo(message):
         liked = dbhelper.get_recipes_liked(chat_id)
 
         msg = bot.reply_to(message,
-            "*Dietary Preference:* {}\n\n".format(diet) +
+            "*Dietary Preference:* \n{}\n\n".format(diet) +
             "*Items in Fridge:* \n{}\n\n".format(items) +
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Recipes Uploaded:* \n\t\t{}\n\n".format(uploaded) +
-            "*Recipes Liked:* \n\t\t{}\n".format(liked) +
+            "*Recipes Uploaded:* \n{}\n\n".format(uploaded) +
+            "*Recipes Liked:* \n{}\n".format(liked) +
             "\nTo access the recipes above, type in the recipe id (i.e. number" +
             " displayed before recipe name). You can only prompt for one recipe at a time.\n" +
             "\nTo maintain ingredients, go to /ingredients. To maintain" +
