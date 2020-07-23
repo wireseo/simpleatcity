@@ -3,7 +3,7 @@ from pymysql import IntegrityError
 import telebot
 import pandas as pd
 import random
-from classes import Cache
+from cache import Cache
 
 db = pymysql.connect(host='westmoondbinstance.crbqchzceqdz.ap-southeast-1.rds.amazonaws.com',
                         port=3306,
@@ -412,6 +412,25 @@ def get_recipes_liked(chat_id):
         data = curs.fetchall()
         if not data:
             print("Nope - recipes liked" + str(data))
+        else:
+            newdata = []
+            for i, (name, id) in enumerate(data):
+                newdata.append((str(id) + ". " + str(name)))
+            newdata = '\n\t\t'.join(newdata)
+            return newdata
+    except Exception as e:
+        print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+
+
+# retrieve user's list of recipes liked
+def get_recipes_disliked(chat_id):
+    try:
+        curs = db.cursor()
+        sql = "SELECT B.rec_name, B.rec_id FROM users_disliked A JOIN recipes B ON A.rec_id = B.rec_id JOIN users C ON A.user_id = C.id WHERE (C.user_id) = '" + str(chat_id) + "'"
+        curs.execute(sql)
+        data = curs.fetchall()
+        if not data:
+            print("Nope - recipes disliked" + str(data))
         else:
             newdata = []
             for i, (name, id) in enumerate(data):
