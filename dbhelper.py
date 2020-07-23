@@ -598,8 +598,8 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 # add the recipe to the user's liked list
-def add_to_fav(msg):
-    user_id = get_uid_with_chat_id(msg.chat.id)
+def add_to_fav(call):
+    user_id = get_uid_with_chat_id(call.from_user)
     try:
         curs = db.cursor()
         # check if the recipe is already in disliked list

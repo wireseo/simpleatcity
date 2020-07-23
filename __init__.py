@@ -410,7 +410,7 @@ def ask_ingredients(message):
     bot.register_next_step_handler(ingredients, send_quickrecipe)
 
 
-# suggest recipe based on given ingredients
+# suggest recipes based on given ingredients
 def send_quickrecipe(ingredients):
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipe = dbhelper.get_quickrecipes(ingredients.text)
@@ -419,7 +419,7 @@ def send_quickrecipe(ingredients):
     elif recipe == 'error':
         bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
     else:
-        # set the global variable to store list of recipe
+        # cache the list of filtered recipes
         Cache.rec_list_dict[user_id] = recipe
         gen_recipe(ingredients, recipe)
 
@@ -459,22 +459,31 @@ def process_callback(cb):
         return
 
 
+# # show another recipe to the user
+# def gen_recipe(message, recipe_list):
+#     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
+#     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+#     itembtn_like = types.KeyboardButton('\U00002764 Add to favourites')
+#     itembtn_another = types.KeyboardButton('\U0001F500 Show another recipe')
+#     itembtn_cancel = types.KeyboardButton('\U0000274C Cancel')
+#     markup.row(itembtn_like, itembtn_another)
+#     markup.row(itembtn_cancel)
+#     rand_idx = get_random_index(recipe_list)
+#     Cache.rec_list_dict[user_id] = recipe_list
+#     Cache.rec_tup_dict[user_id] = recipe_list[rand_idx]
+#     rand_rec = get_random_recipe_str(recipe_list, rand_idx)
+#     callback = bot.reply_to(message, rand_rec, reply_markup=markup)
+#     bot.register_next_step_handler(callback, process_callback)
+
 # show another recipe to the user
 def gen_recipe(message, recipe_list):
-    user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
-    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-    itembtn_like = types.KeyboardButton('\U00002764 Add to favourites')
-    itembtn_another = types.KeyboardButton('\U0001F500 Show another recipe')
-    itembtn_cancel = types.KeyboardButton('\U0000274C Cancel')
-    markup.row(itembtn_like, itembtn_another)
-    markup.row(itembtn_cancel)
+    chat_id = message.chat.id
+    user_id = dbhelper.get_uid_with_chat_id(chat_id)
     rand_idx = get_random_index(recipe_list)
     Cache.rec_list_dict[user_id] = recipe_list
     Cache.rec_tup_dict[user_id] = recipe_list[rand_idx]
     rand_rec = get_random_recipe_str(recipe_list, rand_idx)
-    callback = bot.reply_to(message, rand_rec, reply_markup=markup)
-    bot.register_next_step_handler(callback, process_callback)
-
+    bot.send_message(chat_id, rand_rec, reply_markup=gen_markup_recipe())
 
 # retrieve random element from input list
 def get_random_index(input):
@@ -484,6 +493,26 @@ def get_random_index(input):
 def get_random_recipe_str(input, idx):
     return 'Would you like to try "{}"?\n{}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
 
+def gen_markup_recipe():
+    markup_recipe = InlineKeyboardMarkup()
+    markup_recipe.row_width = 2
+    markup_recipe.add(InlineKeyboardButton("\U00002764 Add to favourites", callback_data="cb_fav"),
+        InlineKeyboardButton("\U0001F500 Show another recipe", callback_data="cb_another"),
+        InlineKeyboardButton("\U0000274C Cancel", callback_data="cb_cancel"))
+    return markup_recipe
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    print(call)
+    user_id = dbhelper.get_uid_with_chat_id(call.from_sender)
+    if call.data == "cb_fav":
+        result = dbhelper.add_to_fav(call)
+        bot.answer_callback_query(call.id, result)
+    elif call.data == "cb_another":
+        bot.answer_callback_query(call.id, "Here is another recipe for you.")
+        return gen_recipe(call.message, Cache.rec_list_dict[user_id])
+    elif call.data == "cb_cancel":
+        bot.answer_callback_query(call.id, "Cancel any further actions.")
 
 #####
 def gen_markup():
@@ -493,12 +522,12 @@ def gen_markup():
                                InlineKeyboardButton("No", callback_data="cb_no"))
     return markup
 
-@bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
-    if call.data == "cb_yes":
-        bot.answer_callback_query(call.id, "Answer is Yes")
-    elif call.data == "cb_no":
-        bot.answer_callback_query(call.id, "Answer is No")
+# @bot.callback_query_handler(func=lambda call: True)
+# def callback_query(call):
+#     if call.data == "cb_yes":
+#         bot.answer_callback_query(call.id, "Answer is Yes")
+#     elif call.data == "cb_no":
+#         bot.answer_callback_query(call.id, "Answer is No")
 
 @bot.message_handler(commands=['test'])
 def message_handler(message):
