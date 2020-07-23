@@ -513,6 +513,7 @@ def callback_query(call):
         gen_recipe(call.message, Cache.rec_list_dict[user_id])
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
+        bot.deleteMessage(call.message.message_id)
 
 #####
 def gen_markup():
