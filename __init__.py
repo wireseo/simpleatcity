@@ -10,7 +10,7 @@ import dbhelper
 import random
 
 TOKEN = '1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0'
-bot = telebot.TeleBot(TOKEN
+bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
 dbhelper.cache_ingredients()
 strlst = []
