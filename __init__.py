@@ -3,6 +3,7 @@ from flask import Flask, request
 import telebot
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+import telepot
 import inspect
 from enums import Diet
 from cache import Cache
@@ -11,6 +12,7 @@ import random
 
 TOKEN = '1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0'
 bot = telebot.TeleBot(TOKEN)
+botduo = telepot.Bot(TOKEN)
 server = Flask(__name__)
 dbhelper.cache_ingredients()
 strlst = []
@@ -413,50 +415,50 @@ def ask_ingredients(message):
 # suggest recipes based on given ingredients
 def send_quickrecipe(ingredients):
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
-    recipe = dbhelper.get_quickrecipes(ingredients.text)
-    if recipe == 'norec':
+    recipes = dbhelper.get_quickrecipes(ingredients.text)
+    if recipes == 'norec':
         bot.reply_to(ingredients, '\U0001F645 No recipe found')
-    elif recipe == 'error':
+    elif recipes == 'error':
         bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
     else:
-        # cache the list of filtered recipes
-        Cache.rec_list_dict[user_id] = recipe
-        gen_recipe(ingredients, recipe)
+        # # cache the list of filtered recipes
+        # Cache.rec_list_dict[user_id] = recipes
+        gen_recipe(ingredients, recipes)
 
 
 # user given recipe based on user information
 @bot.message_handler(commands=['recipe'])
 def send_recipe(message):
     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
-    recipe = dbhelper.get_recipes(user_id)
+    recipes = dbhelper.get_recipes(user_id)
 
-    if recipe == 'norec':
+    if recipes == 'norec':
         bot.reply_to(message, '\U0001F645 No recipe found.')
-    elif recipe == 'norec_ing':
+    elif recipes == 'norec_ing':
         bot.reply_to(message, '\U0001F645 No recipe found.\nPlease add more ingredients.')
-    elif recipe == 'norec_ute':
+    elif recipes == 'norec_ute':
         bot.reply_to(message, '\U0001F645 No recipe found.\nPlease add more utensils.')
-    elif recipe == 'error':
+    elif recipes == 'error':
         bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured. Please make sure you have added all the necessary information in /myinfo.')
     else:
-        # set the global variable to store list of recipe
-        Cache.rec_list_dict[user_id] = recipe
-        gen_recipe(message, recipe)
+        # # cache the list of recipes
+        # Cache.rec_list_dict[user_id] = recipes
+        gen_recipe(message, recipes)
 
 
 # process response from user 1)fav 2)another 3)cancel
-def process_callback(cb):
-    user_id = dbhelper.get_uid_with_chat_id(cb.chat.id)
-    if cb.text == u'\U00002764 Add to favourites':
-        # function to add recipe to favourites
-        return bot.reply_to(cb, dbhelper.add_to_fav(cb))
-    elif cb.text == u'\U0001F500 Show another recipe':
-        return gen_recipe(cb, Cache.rec_list_dict[user_id])
-    elif cb.text == u'\U0000274C Cancel':
-         return
-    else:
-        # default
-        return
+# def process_callback(cb):
+#     user_id = dbhelper.get_uid_with_chat_id(cb.chat.id)
+#     if cb.text == u'\U00002764 Add to favourites':
+#         # function to add recipe to favourites
+#         return bot.reply_to(cb, dbhelper.add_to_fav(cb))
+#     elif cb.text == u'\U0001F500 Show another recipe':
+#         return gen_recipe(cb, Cache.rec_list_dict[user_id])
+#     elif cb.text == u'\U0000274C Cancel':
+#          return
+#     else:
+#         # default
+#         return
 
 
 # # show another recipe to the user
@@ -480,6 +482,7 @@ def gen_recipe(message, recipe_list):
     chat_id = message.chat.id
     user_id = dbhelper.get_uid_with_chat_id(chat_id)
     rand_idx = get_random_index(recipe_list)
+    # cache the 1)list of filtered recipes and the 2)selected recipe
     Cache.rec_list_dict[user_id] = recipe_list
     Cache.rec_tup_dict[user_id] = recipe_list[rand_idx]
     rand_rec = get_random_recipe_str(recipe_list, rand_idx)
@@ -513,7 +516,7 @@ def callback_query(call):
         gen_recipe(call.message, Cache.rec_list_dict[user_id])
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
-        bot.deleteMessage(call.message.message_id)
+        botduo.deleteMessage(telepot.message_identifier(call.message))
 
 #####
 def gen_markup():
