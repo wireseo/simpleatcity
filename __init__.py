@@ -481,7 +481,7 @@ def callback_query(call):
         gen_recipe(call.message, Cache.rec_list_dict[user_id])
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
-        bot.edit_message_reply_markup(message_id = call.message.message_id, reply_markup = NULL)
+        bot.edit_message_reply_markup(message_id = call.message.message_id, reply_markup = None)
 
 
 bot.enable_save_next_step_handlers(delay=2)
