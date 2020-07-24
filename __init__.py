@@ -3,7 +3,6 @@ from flask import Flask, request
 import telebot
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-import telepot
 import inspect
 from enums import Diet
 from cache import Cache
@@ -12,7 +11,6 @@ import random
 
 TOKEN = '1117988587:AAERFRl23gsQ6rOqcyeO4nSWpPWGdz_1Bh0'
 bot = telebot.TeleBot(TOKEN)
-botduo = telepot.Bot(TOKEN)
 server = Flask(__name__)
 dbhelper.cache_ingredients()
 strlst = []
@@ -421,8 +419,6 @@ def send_quickrecipe(ingredients):
     elif recipes == 'error':
         bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
     else:
-        # # cache the list of filtered recipes
-        # Cache.rec_list_dict[user_id] = recipes
         gen_recipe(ingredients, recipes)
 
 
@@ -441,41 +437,8 @@ def send_recipe(message):
     elif recipes == 'error':
         bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured. Please make sure you have added all the necessary information in /myinfo.')
     else:
-        # # cache the list of recipes
-        # Cache.rec_list_dict[user_id] = recipes
         gen_recipe(message, recipes)
 
-
-# process response from user 1)fav 2)another 3)cancel
-# def process_callback(cb):
-#     user_id = dbhelper.get_uid_with_chat_id(cb.chat.id)
-#     if cb.text == u'\U00002764 Add to favourites':
-#         # function to add recipe to favourites
-#         return bot.reply_to(cb, dbhelper.add_to_fav(cb))
-#     elif cb.text == u'\U0001F500 Show another recipe':
-#         return gen_recipe(cb, Cache.rec_list_dict[user_id])
-#     elif cb.text == u'\U0000274C Cancel':
-#          return
-#     else:
-#         # default
-#         return
-
-
-# # show another recipe to the user
-# def gen_recipe(message, recipe_list):
-#     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
-#     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-#     itembtn_like = types.KeyboardButton('\U00002764 Add to favourites')
-#     itembtn_another = types.KeyboardButton('\U0001F500 Show another recipe')
-#     itembtn_cancel = types.KeyboardButton('\U0000274C Cancel')
-#     markup.row(itembtn_like, itembtn_another)
-#     markup.row(itembtn_cancel)
-#     rand_idx = get_random_index(recipe_list)
-#     Cache.rec_list_dict[user_id] = recipe_list
-#     Cache.rec_tup_dict[user_id] = recipe_list[rand_idx]
-#     rand_rec = get_random_recipe_str(recipe_list, rand_idx)
-#     callback = bot.reply_to(message, rand_rec, reply_markup=markup)
-#     bot.register_next_step_handler(callback, process_callback)
 
 # show another recipe to the user
 def gen_recipe(message, recipe_list):
@@ -488,6 +451,7 @@ def gen_recipe(message, recipe_list):
     rand_rec = get_random_recipe_str(recipe_list, rand_idx)
     bot.send_message(chat_id, rand_rec, reply_markup=gen_markup_recipe())
 
+
 # retrieve random element from input list
 def get_random_index(input):
     return random.randint(0, len(input) - 1)
@@ -496,6 +460,7 @@ def get_random_index(input):
 def get_random_recipe_str(input, idx):
     return 'Would you like to try "{}"?\n{}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
 
+# build inline keyboard markup for gen_recipe
 def gen_markup_recipe():
     markup_recipe = InlineKeyboardMarkup()
     markup_recipe.row_width = 1
@@ -516,27 +481,7 @@ def callback_query(call):
         gen_recipe(call.message, Cache.rec_list_dict[user_id])
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
-        botduo.deleteMessage(telepot.message_identifier(call.message))
-
-#####
-def gen_markup():
-    markup = InlineKeyboardMarkup()
-    markup.row_width = 2
-    markup.add(InlineKeyboardButton("Yes", callback_data="cb_yes"),
-                               InlineKeyboardButton("No", callback_data="cb_no"))
-    return markup
-
-# @bot.callback_query_handler(func=lambda call: True)
-# def callback_query(call):
-#     if call.data == "cb_yes":
-#         bot.answer_callback_query(call.id, "Answer is Yes")
-#     elif call.data == "cb_no":
-#         bot.answer_callback_query(call.id, "Answer is No")
-
-@bot.message_handler(commands=['test'])
-def message_handler(message):
-    bot.send_message(message.chat.id, "Yes/no?", reply_markup=gen_markup())
-#####
+        bot.editMessageReplyMarkup(message_id = call.message.message_id, reply_markup = NULL)
 
 
 bot.enable_save_next_step_handlers(delay=2)
