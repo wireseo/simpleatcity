@@ -505,7 +505,7 @@ def get_random_index(input):
     return random.randint(0, len(input) - 1)
 
 
-def get_recipe_str(input, idx):
+def get_recipe_str(input):
     return 'Would you like to try "{}"?\n{}'.format(str(input[1]).lower(), str(input[4]))
 
 
