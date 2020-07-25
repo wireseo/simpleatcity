@@ -117,7 +117,7 @@ def add_likes(message):
         bot.reply_to(message, "Please check your input.")
     else:
         text = text[3:].replace(" ", "")
-        likeslst = text[3:].split(",")
+        likeslst = text.split(",")
         str = dbhelper.add_likes_to_user(chat_id, likeslst)
         bot.reply_to(message, str)
 
@@ -128,7 +128,7 @@ def add_dislikes(message):
         bot.reply_to(message, "Please check your input.")
     else:
         text = text[3:].replace(" ", "")
-        dislikeslst = text[3:].split(",")
+        dislikeslst = text.split(",")
         str = dbhelper.add_dislikes_to_user(chat_id, dislikeslst)
         bot.reply_to(message, str)
 
@@ -136,7 +136,7 @@ def add_utensils(message):
     chat_id = message.chat.id
     text = message.text.lower()
     text = text[2:].replace(" ", "")
-    utenlst = text[2:].split(",")
+    utenlst = text.split(",")
     str = dbhelper.add_utensils_to_user(chat_id, utenlst)
     bot.reply_to(message, str)
 
@@ -144,7 +144,7 @@ def add_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
     text = text[2:].replace(" ", "")
-    ingredlst = text[2:].split(",")
+    ingredlst = text.split(",")
     str = dbhelper.add_ingredients_to_user(chat_id, ingredlst)
     bot.reply_to(message, str)
 
@@ -170,7 +170,7 @@ def remove_likes(message):
         bot.reply_to(message, "Please check your input.")
     else:
         text = text[3:].replace(" ", "")
-        likeslst = text[3:].split(",")
+        likeslst = text.split(",")
         str = dbhelper.remove_likes_from_user(chat_id, likeslst)
         bot.reply_to(message, str)
 
@@ -181,7 +181,7 @@ def remove_dislikes(message):
         bot.reply_to(message, "Please check your input.")
     else:
         text = text[3:].replace(" ", "")
-        dislikeslst = text[3:].split(",")
+        dislikeslst = text.split(",")
         str = dbhelper.remove_dislikes_from_user(chat_id, dislikeslst)
         bot.reply_to(message, str)
 
@@ -189,7 +189,7 @@ def remove_utensils(message):
     chat_id = message.chat.id
     text = message.text.lower()
     text = text[2:].replace(" ", "")
-    utenlst = text[2:].split(",")
+    utenlst = text.split(",")
     str = dbhelper.remove_utensils_from_user(chat_id, utenlst)
     bot.reply_to(message, str)
 
@@ -197,7 +197,7 @@ def remove_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
     text = text[2:].replace(" ", "")
-    ingredlst = text[2:].split(",")
+    ingredlst = text.split(",")
     str = dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
     bot.reply_to(message, str)
 
