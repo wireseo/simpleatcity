@@ -41,7 +41,7 @@ def get_quickrecipes(ing_name_str):
         if len(final_quickrec) == 0:
             return 'norec'
         else:
-            return final_quickrec
+            return list(final_quickrec)
     except Exception as e:
         print("An exception of type {0} occurred while retrieving quickrecipe. Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'error'
@@ -123,7 +123,7 @@ def get_recipes(user_id):
         if len(final_rec) == 0:
             return 'norec'
         else:
-            return final_rec
+            return list(final_rec)
     except Exception as e:
         print("An exception of type {0} occurred while retrieving recipe. Arguments:\n{1!r}".format(type(e).__name__, e.args))
         return 'error'
@@ -602,7 +602,7 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
     return "Dislikes removed: " + ', '.join(dislikeslst)
-    
+
 
 # add the recipe to the user's liked list
 def add_to_fav(call):
