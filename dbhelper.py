@@ -464,7 +464,7 @@ def get_recipe_with_id(rid):
 def cache_ingredients():
     try:
         curs = db.cursor()
-        sql = "SELECT ing_id, ing_name_1, ing_name_2, ing_name_3, ing_name_4, ing_name_5 FROM ingredients"
+        sql = "SELECT ing_id, ing_name_1, ing_name_2, ing_name_3, ing_name_4, ing_name_5 FROM ingredients ORDER BY ing_name_1"
         curs.execute(sql)
         data = curs.fetchall()
         if not data:
