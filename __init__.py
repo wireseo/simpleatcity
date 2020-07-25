@@ -463,6 +463,8 @@ def send_quickrecipe(ingredients):
     elif recipes == 'error':
         bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
     else:
+        # cache the list of filtered recipes
+        # Cache.rec_list_dict[user_id] = recipes
         gen_recipe(ingredients, recipes)
 
 
@@ -481,6 +483,8 @@ def send_recipe(message):
     elif recipes == 'error':
         bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured. Please make sure you have added all the necessary information in /myinfo.')
     else:
+        # cache the list of filtered recipes
+        # Cache.rec_list_dict[user_id] = recipes
         gen_recipe(message, recipes)
 
 
@@ -488,11 +492,14 @@ def send_recipe(message):
 def gen_recipe(message, recipe_list):
     chat_id = message.chat.id
     user_id = dbhelper.get_uid_with_chat_id(chat_id)
-    rand_idx = get_random_index(recipe_list)
-    # cache the 1)list of filtered recipes and the 2)selected recipe
-    Cache.rec_list_dict[user_id] = recipe_list
-    Cache.rec_tup_dict[user_id] = recipe_list[rand_idx]
-    rand_rec = get_random_recipe_str(recipe_list, rand_idx)
+    if len(recipe_list) == 1:
+        rand_rec = "\U0001F645 There is no other recipe.\n" + message.text
+        return
+    else:
+        rand_idx = get_random_index(recipe_list)
+        # cache the selected recipe
+        Cache.rec_tup_dict[user_id] = recipe_list.pop(rand_idx)
+        rand_rec = get_random_recipe_str(recipe_list, rand_idx)
     bot.send_message(chat_id, rand_rec, reply_markup=gen_markup_recipe())
 
 
@@ -515,7 +522,7 @@ def gen_markup_recipe():
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
-    print(call)
+    # print(call)
     user_id = dbhelper.get_uid_with_chat_id(call.from_user.id)
     if call.data == "cb_fav":
         bot.answer_callback_query(call.id, "\U00002764 Add to favourites")
@@ -525,7 +532,7 @@ def callback_query(call):
         gen_recipe(call.message, Cache.rec_list_dict[user_id])
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
-        # bot.edit_message_reply_markup(message_id = call.message.message_id, reply_markup = None)
+        bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
 
 
 bot.enable_save_next_step_handlers(delay=2)
