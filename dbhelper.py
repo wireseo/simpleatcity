@@ -489,6 +489,7 @@ def add_ingredients_to_user(chat_id, ingredlst):
     user_id = get_uid_with_chat_id(chat_id)
     for ingred in ingredlst:
         id = Cache.ingred_dict.get(ingred)
+        return ingred + ": " + str(id)
         if id is None:
             return "Please check your input. One or more ingredients are not recognized."
         print(id)
@@ -602,7 +603,7 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
     return "Dislikes removed: " + ', '.join(dislikeslst)
-    
+
 
 # add the recipe to the user's liked list
 def add_to_fav(call):
