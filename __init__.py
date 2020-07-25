@@ -526,7 +526,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "\U00002764 Add to favourites")
         bot.reply_to(call.message, dbhelper.add_to_fav(call))
     elif call.data == "cb_another":
-        if len(recipe_list) == 1:
+        if len(Cache.rec_list_dict[user_id]) == 1:
             bot.answer_callback_query(call.id, "\U0001F645 There is no other recipe.")
         else:
             bot.answer_callback_query(call.id, "\U0001F500 Show another recipe")
