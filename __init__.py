@@ -307,13 +307,13 @@ def ask_recipe_name(message):
     rec_name = bot.reply_to(message, inspect.cleandoc("""
         You will now be prompted to provide details for your custom recipe.
         Commands will not be recognized here with the exception of /acceptedingredients when entering the main and sub ingredients.
-        If you want to quit or access other bot functions, enter /q. Please note that any progress thus far will not be saved.
+        If you want to quit or access other bot functions, enter /quit. Please note that any progress thus far will not be saved.
 
         Please enter the name of the recipe."""))
     bot.register_next_step_handler(rec_name, ask_recipe_cat)
 
 def ask_recipe_cat(message):
-    if message.text == "/q":
+    if message.text == "/quit":
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
@@ -325,7 +325,7 @@ def ask_recipe_cat(message):
         bot.register_next_step_handler(cat, ask_recipe_diet)
 
 def ask_recipe_diet(message):
-    if message.text == "/q":
+    if message.text == "/quit":
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
@@ -341,7 +341,7 @@ def ask_recipe_diet(message):
             bot.register_next_step_handler(diet, ask_uten)
 
 def ask_uten(message):
-    if message.text == "/q":
+    if message.text == "/quit":
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
@@ -357,7 +357,7 @@ def ask_uten(message):
             ask_recipe_diet(message)
 
 def ask_main_ing(message):
-    if message.text == "/q":
+    if message.text == "/quit":
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
@@ -366,14 +366,14 @@ def ask_main_ing(message):
             strlst.append(message.text) # "list" of uten index [3]
         main_ing = bot.reply_to(message, inspect.cleandoc("""
             Please enter the main ingredients of the recipe. They should be absolutely
-    integral to the recipe (i.e. recipe cannot be attempted without them).\n
-    Make sure that each is separated with a comma and are in singular form
-    with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
-    If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+integral to the recipe (i.e. recipe cannot be attempted without them).\n
+Make sure that each is separated with a comma and are in singular form
+with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
+If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
         bot.register_next_step_handler(main_ing, ask_sub_ing)
 
 def ask_sub_ing(message):
-    if message.text == "/q":
+    if message.text == "/quit":
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
@@ -402,7 +402,7 @@ def ask_sub_ing(message):
             bot.register_next_step_handler(sub_ing, ask_instructions)
 
 def ask_instructions(message):
-    if message.text == "/q":
+    if message.text == "/quit":
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
@@ -426,12 +426,12 @@ def ask_instructions(message):
                 strlst.append(message.text) # "list" of sub ing names [5]
             instructions = bot.reply_to(message, inspect.cleandoc("""
                 Please enter instructions for the recipe. You can either paste a link
-    to the recipe or type it out in a list format. For the latter, make
-    sure you number the steps and outline the process as clearly as possible."""))
+to the recipe or type it out in a list format. For the latter, make
+sure you number the steps and outline the process as clearly as possible."""))
             bot.register_next_step_handler(instructions, upload_recipe)
 
 def upload_recipe(message):
-    if message.text == "/q":
+    if message.text == "/quit":
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
