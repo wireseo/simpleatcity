@@ -464,7 +464,7 @@ def send_quickrecipe(ingredients):
         bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
     else:
         # cache the list of filtered recipes
-        # Cache.rec_list_dict[user_id] = recipes
+        Cache.rec_list_dict[user_id] = recipes
         gen_recipe(ingredients, recipes)
 
 
@@ -473,7 +473,6 @@ def send_quickrecipe(ingredients):
 def send_recipe(message):
     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
     recipes = dbhelper.get_recipes(user_id)
-
     if recipes == 'norec':
         bot.reply_to(message, '\U0001F645 No recipe found.')
     elif recipes == 'norec_ing':
@@ -484,7 +483,7 @@ def send_recipe(message):
         bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured. Please make sure you have added all the necessary information in /myinfo.')
     else:
         # cache the list of filtered recipes
-        # Cache.rec_list_dict[user_id] = recipes
+        Cache.rec_list_dict[user_id] = recipes
         gen_recipe(message, recipes)
 
 
@@ -492,6 +491,7 @@ def send_recipe(message):
 def gen_recipe(message, recipe_list):
     chat_id = message.chat.id
     user_id = dbhelper.get_uid_with_chat_id(chat_id)
+    recipe_list = Cache.rec_list_dict[user_id]
     if len(recipe_list) == 1:
         rand_rec = "\U0001F645 There is no other recipe.\n" + message.text
         return
