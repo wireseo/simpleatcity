@@ -465,7 +465,7 @@ def send_quickrecipe(ingredients):
     else:
         # cache the list of filtered recipes
         Cache.rec_list_dict[user_id] = recipes
-        gen_recipe(ingredients, recipes)
+        gen_recipe(ingredients)
 
 
 # user given recipe based on user information
@@ -484,23 +484,20 @@ def send_recipe(message):
     else:
         # cache the list of filtered recipes
         Cache.rec_list_dict[user_id] = recipes
-        gen_recipe(message, recipes)
+        gen_recipe(message)
 
 
 # show another recipe to the user
-def gen_recipe(message, recipe_list):
+def gen_recipe(message):
     chat_id = message.chat.id
     user_id = dbhelper.get_uid_with_chat_id(chat_id)
     recipe_list = Cache.rec_list_dict[user_id]
-    if len(recipe_list) == 1:
-        rand_rec = "\U0001F645 There is no other recipe.\n" + message.text
-        return
-    else:
-        rand_idx = get_random_index(recipe_list)
-        # cache the selected recipe
-        Cache.rec_tup_dict[user_id] = recipe_list.pop(rand_idx)
-        rand_rec = get_random_recipe_str(recipe_list, rand_idx)
-    bot.send_message(chat_id, rand_rec, reply_markup=gen_markup_recipe())
+    # get random index
+    rand_idx = get_random_index(recipe_list)
+    # cache the selected recipe
+    Cache.rec_tup_dict[user_id] = recipe_list.pop(rand_idx)
+    recipe_str = get_recipe_str(Cache.rec_tup_dict[user_id])
+    bot.send_message(chat_id, recipe_str, reply_markup=gen_markup_recipe())
 
 
 # retrieve random element from input list
@@ -508,8 +505,9 @@ def get_random_index(input):
     return random.randint(0, len(input) - 1)
 
 
-def get_random_recipe_str(input, idx):
-    return 'Would you like to try "{}"?\n{}'.format(str(input[idx][1]).lower(), str(input[idx][4]))
+def get_recipe_str(input, idx):
+    return 'Would you like to try "{}"?\n{}'.format(str(input[1]).lower(), str(input[4]))
+
 
 # build inline keyboard markup for gen_recipe
 def gen_markup_recipe():
@@ -528,8 +526,11 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "\U00002764 Add to favourites")
         bot.reply_to(call.message, dbhelper.add_to_fav(call))
     elif call.data == "cb_another":
-        bot.answer_callback_query(call.id, "\U0001F500 Show another recipe")
-        gen_recipe(call.message, Cache.rec_list_dict[user_id])
+        if len(recipe_list) == 1:
+            bot.answer_callback_query(call.id, "\U0001F645 There is no other recipe.")
+        else:
+            bot.answer_callback_query(call.id, "\U0001F500 Show another recipe")
+            gen_recipe(call.message)
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
         bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
