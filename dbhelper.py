@@ -499,7 +499,7 @@ def add_ingredients_to_user(chat_id, ingredlst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
-    return "Ingredients added."
+    return "Ingredients added: " + ', '.join(ingredlst)
 
 
 # remove ingredients from user
@@ -517,7 +517,7 @@ def remove_ingredients_from_user(chat_id, ingredlst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
-    return "Ingredients removed."
+    return "Ingredients removed: " + ', '.join(ingredlst)
 
 
 # add utensils to user
@@ -531,6 +531,7 @@ def add_utensils_to_user(chat_id, utenlst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Utensils added: " + ', '.join(utenlst)
 
 
 # remove utensils from user
@@ -544,6 +545,7 @@ def remove_utensils_from_user(chat_id, utenlst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Utensils removed: " + ', '.join(utenlst)
 
 
 # add likes to user
@@ -557,6 +559,7 @@ def add_likes_to_user(chat_id, likeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Likes added: " + ', '.join(likeslst)
 
 
 # remove likes from user
@@ -570,6 +573,7 @@ def remove_likes_from_user(chat_id, likeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Likes removed: " + ', '.join(likeslst)
 
 
 # add dislikes to user
@@ -583,6 +587,7 @@ def add_dislikes_to_user(chat_id, dislikeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Dislikes added: " + ', '.join(dislikeslst)
 
 
 # remove dislikes from user
@@ -596,6 +601,8 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Dislikes removed: " + ', '.join(dislikeslst)
+    
 
 # add the recipe to the user's liked list
 def add_to_fav(call):
