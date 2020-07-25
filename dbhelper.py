@@ -497,9 +497,9 @@ def add_ingredients_to_user(chat_id, ingredlst):
             sql = "INSERT IGNORE INTO users_ingredients (user_id, ing_id) VALUES (" + str(user_id) + ", " + str(id) +")"
             curs.execute(sql)
             db.commit()
-            return "Ingredients added."
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Ingredients added: " + ', '.join(ingredlst)
 
 
 # remove ingredients from user
@@ -515,9 +515,9 @@ def remove_ingredients_from_user(chat_id, ingredlst):
             sql = "DELETE FROM users_ingredients WHERE (user_id = " + str(user_id) + ") AND (ing_id = " + str(id) + ")"
             curs.execute(sql)
             db.commit()
-            return "Ingredients removed."
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Ingredients removed: " + ', '.join(ingredlst)
 
 
 # add utensils to user
@@ -531,6 +531,7 @@ def add_utensils_to_user(chat_id, utenlst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Utensils added: " + ', '.join(utenlst)
 
 
 # remove utensils from user
@@ -544,6 +545,7 @@ def remove_utensils_from_user(chat_id, utenlst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Utensils removed: " + ', '.join(utenlst)
 
 
 # add likes to user
@@ -557,6 +559,7 @@ def add_likes_to_user(chat_id, likeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Likes added: " + ', '.join(likeslst)
 
 
 # remove likes from user
@@ -570,6 +573,7 @@ def remove_likes_from_user(chat_id, likeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Likes removed: " + ', '.join(likeslst)
 
 
 # add dislikes to user
@@ -583,6 +587,7 @@ def add_dislikes_to_user(chat_id, dislikeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Dislikes added: " + ', '.join(dislikeslst)
 
 
 # remove dislikes from user
@@ -596,6 +601,8 @@ def remove_dislikes_from_user(chat_id, dislikeslst):
             db.commit()
         except Exception as e:
             print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
+    return "Dislikes removed: " + ', '.join(dislikeslst)
+    
 
 # add the recipe to the user's liked list
 def add_to_fav(call):
@@ -621,31 +628,6 @@ def add_to_fav(call):
             return '\U0001F44D You have successfully added "{}" to your favourites'.format(str(Cache.rec_tup_dict[user_id][1]))
     except Exception as e:
         print("An exception of type {0} occurred while adding recipe to favourites. Arguments:\n{1!r}".format(type(e).__name__, e.args))
-
-
-# # add the recipe to the user's liked list
-# def dislike_recipe(msg):
-#     user_id = get_uid_with_chat_id(msg.chat.id)
-#     try:
-#         curs = db.cursor()
-#         # check if the recipe is already in disliked list
-#         sql_check = """SELECT EXISTS
-#             (SELECT
-#                 *
-#             FROM
-#                 users_liked
-#             WHERE user_id = {}
-#                 AND rec_id = {})""".format(user_id, Cache.rec_tup_dict[user_id][0])
-#         curs.execute(sql_check)
-#         duplicate = curs.fetchall()
-#         if duplicate[0][0] == 1:
-#             return 'You have already added "{}" to your liked list :(\nPlease remove it before adding it to your disliked list!'.format(str(Cache.rec_tup_dict[user_id][1]))
-#         sql_like = "INSERT IGNORE INTO users_disliked (user_id, rec_id) VALUES ({}, {})".format(str(user_id), str(Cache.rec_tup_dict[user_id][0]))
-#         curs.execute(sql_like)
-#         db.commit()
-#         return 'You have successfully added "{}" to your disliked list :)'.format(str(Cache.rec_tup_dict[user_id][1]))
-#     except Exception as e:
-#         print("An exception of type {0} occurred while adding recipe to disliked list. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
 
 # add a new recipe

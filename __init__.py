@@ -116,9 +116,10 @@ def add_likes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         likeslst = text[3:].split(",")
-        dbhelper.add_likes_to_user(chat_id, likeslst)
-        bot.reply_to(message, "Likes added.")
+        str = dbhelper.add_likes_to_user(chat_id, likeslst)
+        bot.reply_to(message, str)
 
 def add_dislikes(message):
     chat_id = message.chat.id
@@ -126,20 +127,23 @@ def add_dislikes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         dislikeslst = text[3:].split(",")
-        dbhelper.add_dislikes_to_user(chat_id, dislikeslst)
-        bot.reply_to(message, "Dislikes added.")
+        str = dbhelper.add_dislikes_to_user(chat_id, dislikeslst)
+        bot.reply_to(message, str)
 
 def add_utensils(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     utenlst = text[2:].split(",")
-    dbhelper.add_utensils_to_user(chat_id, utenlst)
-    bot.reply_to(message, "Utensils added.")
+    str = dbhelper.add_utensils_to_user(chat_id, utenlst)
+    bot.reply_to(message, str)
 
 def add_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     ingredlst = text[2:].split(",")
     str = dbhelper.add_ingredients_to_user(chat_id, ingredlst)
     bot.reply_to(message, str)
@@ -165,9 +169,10 @@ def remove_likes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         likeslst = text[3:].split(",")
-        dbhelper.remove_likes_from_user(chat_id, likeslst)
-        bot.reply_to(message, "Likes removed.")
+        str = dbhelper.remove_likes_from_user(chat_id, likeslst)
+        bot.reply_to(message, str)
 
 def remove_dislikes(message):
     chat_id = message.chat.id
@@ -175,20 +180,23 @@ def remove_dislikes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         dislikeslst = text[3:].split(",")
-        dbhelper.remove_dislikes_from_user(chat_id, dislikeslst)
-        bot.reply_to(message, "Dislikes removed.")
+        str = dbhelper.remove_dislikes_from_user(chat_id, dislikeslst)
+        bot.reply_to(message, str)
 
 def remove_utensils(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     utenlst = text[2:].split(",")
-    dbhelper.remove_utensils_from_user(chat_id, utenlst)
-    bot.reply_to(message, "Utensils removed.")
+    str = dbhelper.remove_utensils_from_user(chat_id, utenlst)
+    bot.reply_to(message, str)
 
 def remove_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     ingredlst = text[2:].split(",")
     str = dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
     bot.reply_to(message, str)
@@ -253,7 +261,7 @@ def send_ingredients(message):
     msg = bot.reply_to(message, "*Items in Fridge:* \n{}\n\n".format(items) +
     "To add ingredients, type in a list of ingredients with a '+' in front of it." +
     " Make sure that each is separated with a comma and are in singular form" +
-    " without spaces in between (e.g. + avocado,soymilk,lettuce).\n\n" +
+    " either with or without spaces in between (e.g. + avocado, soymilk, lettuce).\n\n" +
     "To remove existing ingredients, type in a list of ingredients with a '-' in front of it.\n\n" +
     "If the bot does not recognize your input, try inputting a more general version of it" +
     " (ex. portobello to mushroom) or try searching for it in /acceptedingredients.\n\n" +
@@ -270,7 +278,7 @@ def send_utensils(message):
     msg = bot.reply_to(message, "*Utensils in Kitchen:* \n{}\n\n".format(utensils) +
     "*Available Utensils:* \n\t\t{}\n\n".format(all_utensils) +
     "To add utensils, type in a list of utensil ids with a '+' in front of it." +
-    " Make sure that each is separated with a comma without spaces in between (e.g. + 1,2,3).\n\n" +
+    " Make sure that each is separated with a comma with or without spaces in between (e.g. + 1, 2, 3).\n\n" +
     "To remove existing utensils, type in a list of utensil ids with a '-' in front of it.\n\n" +
     "Do not attempt to remove and add at the same time.", parse_mode='Markdown')
 
@@ -286,7 +294,7 @@ def send_preferences(message):
     msg = bot.reply_to(message, "*Likes:* {}\n\n".format(likes) + "*Dislikes:* {}\n\n".format(dislikes) +
     "*All Categories:* \n{}\n\n".format(all_cats) +
     "To like categories, type in a list of category ids with a '+L' in front of it." +
-    " Make sure that each is separated with a comma without spaces in between (e.g. +L 1,2). " +
+    " Make sure that each is separated with a comma with or without spaces in between (e.g. +L 1, 2). " +
     "To un-like categories, type in a list of category ids with a '-L' in front of it.\n\n" +
     "To dislike categories, the keyword is '+D'. To un-dislike, the keyword is '-D'."
     "\n\nDo not attempt to remove and add at the same time.", parse_mode='Markdown')
@@ -297,106 +305,142 @@ def send_preferences(message):
 def ask_recipe_name(message):
     print(strlst)
     rec_name = bot.reply_to(message, inspect.cleandoc("""
+        You will now be prompted to provide details for your custom recipe.
+        Commands will not be recognized here with the exception of /acceptedingredients when entering the main and sub ingredients.
+        If you want to quit or access other bot functions, enter /q. Please note that any progress thus far will not be saved.
+
         Please enter the name of the recipe."""))
     bot.register_next_step_handler(rec_name, ask_recipe_cat)
 
 def ask_recipe_cat(message):
-    print(strlst)
-    if len(strlst) == 0:
-        strlst.append(message.text) # recipe name [0]
-    all_cats = dbhelper.get_all_categories()
-    cat = bot.reply_to(message, "Please enter the index of the category this recipe belongs to.\n\nAll Categories: \n{}".format(all_cats))
-    bot.register_next_step_handler(cat, ask_recipe_diet)
+    if message.text == "/q":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the upload process."""))
+    else:
+        print(strlst)
+        if len(strlst) == 0:
+            strlst.append(message.text) # recipe name [0]
+        all_cats = dbhelper.get_all_categories()
+        cat = bot.reply_to(message, "Please enter the index of the category this recipe belongs to.\n\nAll Categories: \n{}".format(all_cats))
+        bot.register_next_step_handler(cat, ask_recipe_diet)
 
 def ask_recipe_diet(message):
-    print(strlst)
-    if not message.text.isdigit():
-        bot.reply_to(message, "Please check your input and retry.")
-        ask_recipe_cat(message)
+    if message.text == "/q":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the upload process."""))
     else:
-        if len(strlst) == 1:
-            strlst.append(message.text) # category index [1]
-        diet = bot.reply_to(message, inspect.cleandoc("""
-            Please enter the index of the dietary restriction of the recipe.\n\n   0. Vegetarian\n   1. Vegan\n   2. Non-vegetarian"""))
-        bot.register_next_step_handler(diet, ask_uten)
+        print(strlst)
+        if not message.text.isdigit():
+            bot.reply_to(message, "Please check your input and retry.")
+            ask_recipe_cat(message)
+        else:
+            if len(strlst) == 1:
+                strlst.append(message.text) # category index [1]
+            diet = bot.reply_to(message, inspect.cleandoc("""
+                Please enter the index of the dietary restriction of the recipe.\n\n   0. Vegetarian\n   1. Vegan\n   2. Non-vegetarian"""))
+            bot.register_next_step_handler(diet, ask_uten)
 
 def ask_uten(message):
-    print(strlst)
-    if message.text.isdigit() and (int(message.text) == 0 or int(message.text) == 1 or int(message.text) == 2):
-        if len(strlst) == 2:
-            strlst.append(message.text) # diet index [2]
-        all_utensils = dbhelper.get_all_utensils()
-        uten = bot.reply_to(message, "Please enter any necessary utensils for the recipe.\n\n*Available Utensils:* \n\t\t{}\n\nMake sure that each is separated with a comma without spaces in between (e.g. 1,2).".format(all_utensils))
-        bot.register_next_step_handler(uten, ask_main_ing)
+    if message.text == "/q":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the upload process."""))
     else:
-        bot.reply_to(message, "Please check your input and retry.")
-        ask_recipe_diet(message)
+        print(strlst)
+        if message.text.isdigit() and (int(message.text) == 0 or int(message.text) == 1 or int(message.text) == 2):
+            if len(strlst) == 2:
+                strlst.append(message.text) # diet index [2]
+            all_utensils = dbhelper.get_all_utensils()
+            uten = bot.reply_to(message, "Please enter any necessary utensils for the recipe.\n\n*Available Utensils:* \n\t\t{}\n\nMake sure that each is separated with a comma without spaces in between (e.g. 1,2).".format(all_utensils))
+            bot.register_next_step_handler(uten, ask_main_ing)
+        else:
+            bot.reply_to(message, "Please check your input and retry.")
+            ask_recipe_diet(message)
 
 def ask_main_ing(message):
-    print(strlst)
-    if len(strlst) == 3:
-        strlst.append(message.text) # "list" of uten index [3]
-    main_ing = bot.reply_to(message, inspect.cleandoc("""
-        Please enter the main ingredients of the recipe. They should be absolutely
-integral to the recipe (i.e. recipe cannot be attempted without them).\n
-Make sure that each is separated with a comma and are in singular form
-without spaces in between (e.g. avocado,soymilk,lettuce).\n
-If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
-    bot.register_next_step_handler(main_ing, ask_sub_ing)
+    if message.text == "/q":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the upload process."""))
+    else:
+        print(strlst)
+        if len(strlst) == 3:
+            strlst.append(message.text) # "list" of uten index [3]
+        main_ing = bot.reply_to(message, inspect.cleandoc("""
+            Please enter the main ingredients of the recipe. They should be absolutely
+    integral to the recipe (i.e. recipe cannot be attempted without them).\n
+    Make sure that each is separated with a comma and are in singular form
+    with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
+    If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+        bot.register_next_step_handler(main_ing, ask_sub_ing)
 
 def ask_sub_ing(message):
-    print(strlst)
-    text = message.text.lower()
-    ingredlst = text[0:].split(",")
-    contin = True
-    for ingred in ingredlst:
-        id = Cache.ingred_dict.get(ingred)
-        if id == None:
-            bot.reply_to(message, "Please check your input and retry. One or more ingredients are not recognized.")
-            contin = False
-            break
-    if not contin:
-        ask_main_ing(message)
+    if message.text == "/q":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the upload process."""))
     else:
-        if len(strlst) == 4:
-            strlst.append(message.text) # "list" of main ing names [4]
-        sub_ing = bot.reply_to(message, inspect.cleandoc("""
-            Please enter the sub ingredients of the recipe. They should be ingredients
-that are not strictly necessary to the recipe (i.e. recipe still can be attempted without them).\n
-Make sure that each is separated with a comma and are in singular form without spaces in between (e.g. avocado,soymilk,lettuce).\n
-If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
-        bot.register_next_step_handler(sub_ing, ask_instructions)
+        if messge.text == "/acceptedingredients":
+            send_accepted_ingredients(message)
+        print(strlst)
+        text = message.text.lower()
+        ingredlst = text[0:].split(",")
+        contin = True
+        for ingred in ingredlst:
+            id = Cache.ingred_dict.get(ingred)
+            if id == None:
+                bot.reply_to(message, "Please check your input and retry. One or more ingredients are not recognized.")
+                contin = False
+                break
+        if not contin:
+            ask_main_ing(message)
+        else:
+            if len(strlst) == 4:
+                strlst.append(message.text) # "list" of main ing names [4]
+            sub_ing = bot.reply_to(message, inspect.cleandoc("""
+                Please enter the sub ingredients of the recipe. They should be ingredients
+    that are not strictly necessary to the recipe (i.e. recipe still can be attempted without them).\n
+    Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
+    If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+            bot.register_next_step_handler(sub_ing, ask_instructions)
 
 def ask_instructions(message):
-    print(strlst)
-    text = message.text.lower()
-    ingredlst = text[0:].split(",")
-    contin = True
-    for ingred in ingredlst:
-        id = Cache.ingred_dict.get(ingred)
-        if id == None:
-            strlst.clear()
-            bot.reply_to(message, "Please check your input and retry. One or more ingredients are not recognized.")
-            contin = False
-            break
-    if not contin:
-        ask_sub_ing(message)
+    if message.text == "/q":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the upload process."""))
     else:
-        if len(strlst) == 5:
-            strlst.append(message.text) # "list" of sub ing names [5]
-        instructions = bot.reply_to(message, inspect.cleandoc("""
-            Please enter instructions for the recipe. You can either paste a link
-to the recipe or type it out in a list format. For the latter, make
-sure you number the steps and outline the process as clearly as possible."""))
-        bot.register_next_step_handler(instructions, upload_recipe)
+        if messge.text == "/acceptedingredients":
+            send_accepted_ingredients(message)
+        print(strlst)
+        text = message.text.lower()
+        ingredlst = text[0:].split(",")
+        contin = True
+        for ingred in ingredlst:
+            id = Cache.ingred_dict.get(ingred)
+            if id == None:
+                strlst.clear()
+                bot.reply_to(message, "Please check your input and retry. One or more ingredients are not recognized.")
+                contin = False
+                break
+        if not contin:
+            ask_sub_ing(message)
+        else:
+            if len(strlst) == 5:
+                strlst.append(message.text) # "list" of sub ing names [5]
+            instructions = bot.reply_to(message, inspect.cleandoc("""
+                Please enter instructions for the recipe. You can either paste a link
+    to the recipe or type it out in a list format. For the latter, make
+    sure you number the steps and outline the process as clearly as possible."""))
+            bot.register_next_step_handler(instructions, upload_recipe)
 
 def upload_recipe(message):
-    print(strlst)
-    strlst.append(message.text) # link or recipe instructions [6]
-    print(strlst)
-    bot.reply_to(message, "Please wait until the recipe is uploaded.")
-    str = dbhelper.upload_recipe(strlst)
-    bot.reply_to(message, str)
+    if message.text == "/q":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the upload process."""))
+    else:
+        print(strlst)
+        strlst.append(message.text) # link or recipe instructions [6]
+        print(strlst)
+        bot.reply_to(message, "Please wait until the recipe is uploaded.")
+        str = dbhelper.upload_recipe(strlst)
+        bot.reply_to(message, str)
 
 
 # user prompted to manually enter available ingredients
