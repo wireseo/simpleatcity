@@ -116,6 +116,7 @@ def add_likes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         likeslst = text[3:].split(",")
         dbhelper.add_likes_to_user(chat_id, likeslst)
         bot.reply_to(message, "Likes added.")
@@ -126,6 +127,7 @@ def add_dislikes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         dislikeslst = text[3:].split(",")
         dbhelper.add_dislikes_to_user(chat_id, dislikeslst)
         bot.reply_to(message, "Dislikes added.")
@@ -133,6 +135,7 @@ def add_dislikes(message):
 def add_utensils(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     utenlst = text[2:].split(",")
     dbhelper.add_utensils_to_user(chat_id, utenlst)
     bot.reply_to(message, "Utensils added.")
@@ -140,7 +143,9 @@ def add_utensils(message):
 def add_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     ingredlst = text[2:].split(",")
+    print("ingredlst: " + ingredlst)
     str = dbhelper.add_ingredients_to_user(chat_id, ingredlst)
     bot.reply_to(message, str)
 
@@ -165,6 +170,7 @@ def remove_likes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         likeslst = text[3:].split(",")
         dbhelper.remove_likes_from_user(chat_id, likeslst)
         bot.reply_to(message, "Likes removed.")
@@ -175,6 +181,7 @@ def remove_dislikes(message):
     if len(text) <= 3:
         bot.reply_to(message, "Please check your input.")
     else:
+        text = text[3:].replace(" ", "")
         dislikeslst = text[3:].split(",")
         dbhelper.remove_dislikes_from_user(chat_id, dislikeslst)
         bot.reply_to(message, "Dislikes removed.")
@@ -182,6 +189,7 @@ def remove_dislikes(message):
 def remove_utensils(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     utenlst = text[2:].split(",")
     dbhelper.remove_utensils_from_user(chat_id, utenlst)
     bot.reply_to(message, "Utensils removed.")
@@ -189,7 +197,9 @@ def remove_utensils(message):
 def remove_ingredients(message):
     chat_id = message.chat.id
     text = message.text.lower()
+    text = text[2:].replace(" ", "")
     ingredlst = text[2:].split(",")
+    print("ingredlst: " + ingredlst)
     str = dbhelper.remove_ingredients_from_user(chat_id, ingredlst)
     bot.reply_to(message, str)
 
@@ -253,7 +263,7 @@ def send_ingredients(message):
     msg = bot.reply_to(message, "*Items in Fridge:* \n{}\n\n".format(items) +
     "To add ingredients, type in a list of ingredients with a '+' in front of it." +
     " Make sure that each is separated with a comma and are in singular form" +
-    " without spaces in between (e.g. + avocado,soymilk,lettuce).\n\n" +
+    " either with or without spaces in between (e.g. + avocado, soymilk, lettuce).\n\n" +
     "To remove existing ingredients, type in a list of ingredients with a '-' in front of it.\n\n" +
     "If the bot does not recognize your input, try inputting a more general version of it" +
     " (ex. portobello to mushroom) or try searching for it in /acceptedingredients.\n\n" +
@@ -270,7 +280,7 @@ def send_utensils(message):
     msg = bot.reply_to(message, "*Utensils in Kitchen:* \n{}\n\n".format(utensils) +
     "*Available Utensils:* \n\t\t{}\n\n".format(all_utensils) +
     "To add utensils, type in a list of utensil ids with a '+' in front of it." +
-    " Make sure that each is separated with a comma without spaces in between (e.g. + 1,2,3).\n\n" +
+    " Make sure that each is separated with a comma with or without spaces in between (e.g. + 1, 2, 3).\n\n" +
     "To remove existing utensils, type in a list of utensil ids with a '-' in front of it.\n\n" +
     "Do not attempt to remove and add at the same time.", parse_mode='Markdown')
 
@@ -286,7 +296,7 @@ def send_preferences(message):
     msg = bot.reply_to(message, "*Likes:* {}\n\n".format(likes) + "*Dislikes:* {}\n\n".format(dislikes) +
     "*All Categories:* \n{}\n\n".format(all_cats) +
     "To like categories, type in a list of category ids with a '+L' in front of it." +
-    " Make sure that each is separated with a comma without spaces in between (e.g. +L 1,2). " +
+    " Make sure that each is separated with a comma with or without spaces in between (e.g. +L 1, 2). " +
     "To un-like categories, type in a list of category ids with a '-L' in front of it.\n\n" +
     "To dislike categories, the keyword is '+D'. To un-dislike, the keyword is '-D'."
     "\n\nDo not attempt to remove and add at the same time.", parse_mode='Markdown')
