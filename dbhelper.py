@@ -647,7 +647,8 @@ def upload_recipe(strlst):
         print(rec_id)
 
         # upload utensils
-        utenlst = strlst[3].split(',')
+        text = strlst[3].replace(" ", "")
+        utenlst = text.split(',')
         for uten in utenlst:
             try:
                 curs = db.cursor()

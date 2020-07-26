@@ -222,8 +222,8 @@ def send_myinfo(message):
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Favourites:* \n{}\n\n\t".format(fav) +
-            "*Recipes Uploaded:* \n{}\n\n\t".format(uploaded) +
+            "*Favourites:* \n\t{}\n\n".format(fav) +
+            "*Recipes Uploaded:* \n\t{}\n\n".format(uploaded) +
             "To access the recipes above, type in the recipe id (i.e. number " +
             "displayed before recipe name). You can only prompt for one recipe at a time.\n\n" +
             "To maintain ingredients, go to /ingredients. To maintain" +
@@ -363,7 +363,6 @@ def ask_main_ing(message):
     else:
         print(strlst)
         if len(strlst) == 3:
-            text = message.text.replace(" ", "")
             strlst.append(text) # "list" of uten index [3]
         main_ing = bot.reply_to(message, inspect.cleandoc("""
             Please enter the main ingredients of the recipe. They should be absolutely integral to the recipe (i.e. recipe cannot be attempted without them).\n
