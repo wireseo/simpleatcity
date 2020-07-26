@@ -444,8 +444,7 @@ def upload_recipe(message):
 @bot.message_handler(commands=['quickrecipe'])
 def ask_ingredients(message):
     ingredients = bot.reply_to(message, inspect.cleandoc("""
-        Please enter all the available ingredients.
-        Use singular form for ingredients and seperate different ingredients with commas.
+        Please enter all the available ingredients. Use singular form for ingredients and seperate different ingredients with commas.
         ex) avocado, bacon, cauliflower
 
         If you want to quit or access other bot functions, please enter /quit."""))
@@ -459,9 +458,9 @@ def send_quickrecipe(ingredients):
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipes = dbhelper.get_quickrecipes(ingredients.text)
     if recipes == 'norec':
-        bot.reply_to(ingredients, '\U0001F645 No recipe found. Please refer to /acceptedingredients for a list of all the valid ingredients.')
+        bot.reply_to(ingredients, '\U0001F645 No recipe found. Please add more /ingredients.')
     elif recipes == 'error':
-        bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
+        bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please refer to /acceptedingredients for a list of all the valid ingredients.')
     else:
         # cache the list of filtered recipes
         Cache.rec_list_dict[user_id] = recipes
@@ -473,13 +472,12 @@ def send_quickrecipe(ingredients):
 def send_recipe(message):
     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
     recipes = dbhelper.get_recipes(user_id)
-    print(recipes)
     if recipes == 'norec':
-        bot.reply_to(message, '\U0001F645 No recipe found.')
+        bot.reply_to(message, '\U0001F645 No recipe found. Please add more /ingredients or /utensils.')
     elif recipes == 'norec_ing':
-        bot.reply_to(message, '\U0001F645 No recipe found. Please add more ingredients.')
+        bot.reply_to(message, '\U0001F645 No recipe found. Please add more /ingredients.')
     elif recipes == 'norec_ute':
-        bot.reply_to(message, '\U0001F645 No recipe found. Please add more utensils.')
+        bot.reply_to(message, '\U0001F645 No recipe found. Please add more /utensils.')
     elif recipes == 'error':
         bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured. Please make sure you have added all the necessary information in /myinfo.')
     else:
@@ -492,19 +490,22 @@ def send_recipe(message):
 def gen_recipe(message):
     chat_id = message.chat.id
     user_id = dbhelper.get_uid_with_chat_id(chat_id)
-    recipe_list = Cache.rec_list_dict[user_id]
     # get random index
-    rand_idx = get_random_index(recipe_list)
-    # cache the selected recipe
-    Cache.rec_tup_dict[user_id] = recipe_list.pop(rand_idx)
+    rand_idx = get_random_index(Cache.rec_list_dict[user_id])
+    # handles the case where there is only one recipe left
+    if rand_idx == -1:
+        Cache.rec_tup_dict[user_id] = Cache.rec_list_dict[user_id][0]
+    else:
+        # cache the selected recipe
+        Cache.rec_tup_dict[user_id] = Cache.rec_list_dict[user_id].pop(rand_idx)
     recipe_str = format_recipe_str(Cache.rec_tup_dict[user_id])
-    bot.send_message(chat_id, recipe_str, reply_markup=gen_markup_recipe(), parse_mode='Markdown')
+    bot.send_message(chat_id, recipe_str, parse_mode='Markdown', reply_markup=gen_markup_recipe())
 
 
 # retrieve random element from input list
 def get_random_index(input):
     if len(input) == 1:
-        return 0
+        return -1
     else:
         return random.randint(0, len(input) - 1)
 
@@ -522,6 +523,7 @@ def gen_markup_recipe():
         InlineKeyboardButton("\U0000274C Cancel", callback_data="cb_cancel"))
     return markup_recipe
 
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     # print(call)
@@ -530,7 +532,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "\U00002764 Add to favourites")
         bot.reply_to(call.message, dbhelper.add_to_fav(call))
     elif call.data == "cb_another":
-        if len(Cache.rec_list_dict[user_id]) <= 1:
+        if len(Cache.rec_list_dict[user_id]) == 1:
             bot.answer_callback_query(call.id, "\U0001F645 There is no other recipe.")
         else:
             bot.answer_callback_query(call.id, "\U0001F500 Show another recipe")

@@ -37,7 +37,7 @@ def get_quickrecipes(ing_name_str):
         # execute SQL query
         curs.execute(sql)
         final_quickrec = curs.fetchall()
-        # if no recipe exists
+        # handles a case when no recipe exists
         if len(final_quickrec) == 0:
             return 'norec'
         else:
@@ -105,9 +105,9 @@ def get_recipes(user_id):
         # process diet_id to include all available diet
         processed_diet_id_str = process_diet(diet_id_str)
         # retrieve list of user's disliked categories
-        dislikes = get_dislikes_from_user(user_id)
+        # dislikes = get_dislikes_from_user(user_id)
         # concatenate list of utensils id into a string
-        dislikes_id_str = ','.join(map(str, dislikes))
+        # dislikes_id_str = ','.join(map(str, dislikes))
 
         # find all available recipes based on ingreidents, utensils, diet, and preferences
         curs = db.cursor()
@@ -119,7 +119,7 @@ def get_recipes(user_id):
         """.format(processed_diet_id_str, rec_by_ing_str, rec_by_ute_str)
         curs.execute(sql)
         final_rec = curs.fetchall()
-        # if no recipe exists
+        # handles a case when no recipe exists
         if len(final_rec) == 0:
             return 'norec'
         else:
@@ -129,7 +129,7 @@ def get_recipes(user_id):
         return 'error'
 
 
-# process diet_id to include all available diet
+# process diet_id to include all available diets
 def process_diet(diet_id):
     if diet_id == "0":
         return "0"
