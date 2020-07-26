@@ -647,7 +647,7 @@ def upload_recipe(strlst):
         print(rec_id)
 
         # upload utensils
-        text = strlst[3].replace(" ", "")
+        text = str(strlst[3]).replace(" ", "")
         utenlst = text.split(',')
         for uten in utenlst:
             try:
