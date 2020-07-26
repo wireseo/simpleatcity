@@ -444,21 +444,18 @@ def upload_recipe(message):
 @bot.message_handler(commands=['quickrecipe'])
 def ask_ingredients(message):
     ingredients = bot.reply_to(message, inspect.cleandoc("""
-        Please enter the available ingredients.
-
+        Please enter all the available ingredients.
         Use singular form for ingredients and seperate different ingredients with commas.
         ex) avocado, bacon, cauliflower
 
         If you want to quit or access other bot functions, please enter /quit."""))
-    if ingredients.text == "/quit":
-        msg = bot.reply_to(message, inspect.cleandoc("""
-            You have quit the /quickrecipe process."""))
-    else:
-        bot.register_next_step_handler(ingredients, send_quickrecipe)
+    bot.register_next_step_handler(ingredients, send_quickrecipe)
 
 
 # suggest recipes based on given ingredients
 def send_quickrecipe(ingredients):
+    if ingredients.text == "/quit":
+        return bot.reply_to(ingredients, '\U0001F926 You have quit the /quickrecipe process.''))
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipes = dbhelper.get_quickrecipes(ingredients.text)
     if recipes == 'norec':
@@ -500,17 +497,20 @@ def gen_recipe(message):
     rand_idx = get_random_index(recipe_list)
     # cache the selected recipe
     Cache.rec_tup_dict[user_id] = recipe_list.pop(rand_idx)
-    recipe_str = get_recipe_str(Cache.rec_tup_dict[user_id])
-    bot.send_message(chat_id, recipe_str, reply_markup=gen_markup_recipe())
+    recipe_str = format_recipe_str(Cache.rec_tup_dict[user_id])
+    bot.send_message(chat_id, recipe_str, reply_markup=gen_markup_recipe(), parse_mode='Markdown')
 
 
 # retrieve random element from input list
 def get_random_index(input):
-    return random.randint(0, len(input) - 1)
+    if len(input) == 1:
+        return 0
+    else:
+        return random.randint(0, len(input) - 1)
 
 
-def get_recipe_str(input):
-    return 'Would you like to try "{}"?\n{}'.format(str(input[1]).lower(), str(input[4]))
+def format_recipe_str(input):
+    return 'Would you like to try "{}"?\n*{}*'.format(str(input[1]).lower(), str(input[4]))
 
 
 # build inline keyboard markup for gen_recipe
@@ -530,7 +530,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "\U00002764 Add to favourites")
         bot.reply_to(call.message, dbhelper.add_to_fav(call))
     elif call.data == "cb_another":
-        if len(Cache.rec_list_dict[user_id]) == 1:
+        if len(Cache.rec_list_dict[user_id]) <= 1:
             bot.answer_callback_query(call.id, "\U0001F645 There is no other recipe.")
         else:
             bot.answer_callback_query(call.id, "\U0001F500 Show another recipe")
