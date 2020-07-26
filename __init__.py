@@ -375,7 +375,7 @@ def ask_sub_ing(message):
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
-        if messge.text == "/acceptedingredients":
+        if message.text == "/acceptedingredients":
             send_accepted_ingredients(message)
         print(strlst)
         text = message.text.lower()
@@ -403,7 +403,7 @@ def ask_instructions(message):
         msg = bot.reply_to(message, inspect.cleandoc("""
             You have quit the upload process."""))
     else:
-        if messge.text == "/acceptedingredients":
+        if message.text == "/acceptedingredients":
             send_accepted_ingredients(message)
         print(strlst)
         text = message.text.lower()
@@ -529,6 +529,13 @@ def callback_query(call):
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
         bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+
+
+# Handles the case where invalid command is entered
+@bot.message_handler(regexp="/\/.*")
+def send_unknown(message):
+    reply = "\U0001F937 {} is an invalid command. Please check /help for a list of available commands".format(messge.text)
+    bot.reply_to(message, reply)
 
 
 bot.enable_save_next_step_handlers(delay=2)
