@@ -488,10 +488,11 @@ def send_recipe(message):
 def gen_recipe(message):
     chat_id = message.chat.id
     user_id = dbhelper.get_uid_with_chat_id(chat_id)
+    recipe_list = Cache.rec_list_dict[user_id]
     # get random index
-    rand_idx = get_random_index(Cache.rec_list_dict[user_id])
+    rand_idx = get_random_index(recipe_list)
     # cache the selected recipe
-    Cache.rec_tup_dict[user_id] = Cache.rec_list_dict[user_id].pop(rand_idx)
+    Cache.rec_tup_dict[user_id] = recipe_list.pop(rand_idx)
     recipe_str = get_recipe_str(Cache.rec_tup_dict[user_id])
     bot.send_message(chat_id, recipe_str, reply_markup=gen_markup_recipe())
 
