@@ -363,7 +363,7 @@ def ask_main_ing(message):
     else:
         print(strlst)
         if len(strlst) == 3:
-            strlst.append(text) # "list" of uten index [3]
+            strlst.append(strlst) # "list" of uten index [3]
         main_ing = bot.reply_to(message, inspect.cleandoc("""
             Please enter the main ingredients of the recipe. They should be absolutely integral to the recipe (i.e. recipe cannot be attempted without them).\n
             Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
