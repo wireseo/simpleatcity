@@ -356,9 +356,7 @@ def get_all_categories():
             newdata = []
             for i, (id, name) in enumerate(data):
                 newdata.append(str(id) + ". " + str(name))
-                if i % 2 != 0:
-                    newdata.append("\n")
-            newdata = " ".join(newdata)
+            newdata = ','.join(newdata)
             return newdata
 
     except Exception as e:

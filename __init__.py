@@ -537,7 +537,7 @@ def callback_query(call):
 
 
 # Handles the case where invalid command is entered
-@bot.message_handler(regexp="/\/[A-Za-z]*")
+@bot.message_handler(regexp="/\/.*")
 def send_unknown(message):
     reply = "\U0001F937 {} is an invalid command. Please check /help for a list of available commands".format(messge.text)
     bot.reply_to(message, reply)
