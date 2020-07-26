@@ -218,12 +218,12 @@ def send_myinfo(message):
 
         msg = bot.reply_to(message,
             "*Dietary Preference:* \n{}\n\n".format(diet) +
-            "*Ingredients:* \n{}\n\n".format(items) +
+            "*Items in Fridge:* \n{}\n\n".format(items) +
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Favourites:* \n{}\n\n\t".format(fav) +
-            "*Recipes Uploaded:* \n{}\n\n\t".format(uploaded) +
+            "*Favourites:* \n{}\n\n".format(fav) +
+            "*Recipes Uploaded:* \n{}\n\n".format(uploaded) +
             "To access the recipes above, type in the recipe id (i.e. number " +
             "displayed before recipe name). You can only prompt for one recipe at a time.\n\n" +
             "To maintain ingredients, go to /ingredients. To maintain" +
@@ -258,7 +258,7 @@ def send_ingredients(message):
     chat_id = message.chat.id
     items = dbhelper.get_ingredients(chat_id)
 
-    msg = bot.reply_to(message, "*Ingredients:* \n{}\n\n".format(items) +
+    msg = bot.reply_to(message, "*Items in Fridge:* \n{}\n\n".format(items) +
     "To add ingredients, type in a list of ingredients with a '+' in front of it." +
     " Make sure that each is separated with a comma and are in singular form" +
     " either with or without spaces in between (e.g. + avocado, soymilk, lettuce).\n\n" +
@@ -365,9 +365,11 @@ def ask_main_ing(message):
         if len(strlst) == 3:
             strlst.append(message.text) # "list" of uten index [3]
         main_ing = bot.reply_to(message, inspect.cleandoc("""
-            Please enter the main ingredients of the recipe. They should be absolutely integral to the recipe (i.e. recipe cannot be attempted without them).\n
-            Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
-            If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+            Please enter the main ingredients of the recipe. They should be absolutely
+integral to the recipe (i.e. recipe cannot be attempted without them).\n
+Make sure that each is separated with a comma and are in singular form
+with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
+If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
         bot.register_next_step_handler(main_ing, ask_sub_ing)
 
 def ask_sub_ing(message):
@@ -393,9 +395,10 @@ def ask_sub_ing(message):
             if len(strlst) == 4:
                 strlst.append(message.text) # "list" of main ing names [4]
             sub_ing = bot.reply_to(message, inspect.cleandoc("""
-                Please enter the sub ingredients of the recipe. They should be ingredients that are not strictly necessary to the recipe (i.e. recipe still can be attempted without them).\n
-                Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
-                If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+                Please enter the sub ingredients of the recipe. They should be ingredients
+    that are not strictly necessary to the recipe (i.e. recipe still can be attempted without them).\n
+    Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
+    If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
             bot.register_next_step_handler(sub_ing, ask_instructions)
 
 def ask_instructions(message):
@@ -422,7 +425,9 @@ def ask_instructions(message):
             if len(strlst) == 5:
                 strlst.append(message.text) # "list" of sub ing names [5]
             instructions = bot.reply_to(message, inspect.cleandoc("""
-                Please enter instructions for the recipe. You can either paste a link to the recipe or type it out in a list format. For the latter, make sure you number the steps and outline the process as clearly as possible."""))
+                Please enter instructions for the recipe. You can either paste a link
+to the recipe or type it out in a list format. For the latter, make
+sure you number the steps and outline the process as clearly as possible."""))
             bot.register_next_step_handler(instructions, upload_recipe)
 
 def upload_recipe(message):
@@ -532,7 +537,7 @@ def callback_query(call):
 
 
 # Handles the case where invalid command is entered
-@bot.message_handler(regexp="/\/.*")
+@bot.message_handler(regexp="\/[A-Za-z]*")
 def send_unknown(message):
     reply = "\U0001F937 {} is an invalid command. Please check /help for a list of available commands".format(messge.text)
     bot.reply_to(message, reply)
