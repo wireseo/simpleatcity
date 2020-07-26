@@ -447,8 +447,14 @@ def ask_ingredients(message):
         Please enter the available ingredients.
 
         Use singular form for ingredients and seperate different ingredients with commas.
-        ex) avocado, bacon, cauliflower"""))
-    bot.register_next_step_handler(ingredients, send_quickrecipe)
+        ex) avocado, bacon, cauliflower
+
+        If you want to quit or access other bot functions, please enter /quit."""))
+    if ingredients.text == "/quit":
+        msg = bot.reply_to(message, inspect.cleandoc("""
+            You have quit the /quickrecipe process."""))
+    else:
+        bot.register_next_step_handler(ingredients, send_quickrecipe)
 
 
 # suggest recipes based on given ingredients
@@ -456,7 +462,7 @@ def send_quickrecipe(ingredients):
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipes = dbhelper.get_quickrecipes(ingredients.text)
     if recipes == 'norec':
-        bot.reply_to(ingredients, '\U0001F645 No recipe found.')
+        bot.reply_to(ingredients, '\U0001F645 No recipe found. Please refer to /acceptedingredients for a list of all the valid ingredients.')
     elif recipes == 'error':
         bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please try again.')
     else:
@@ -470,12 +476,13 @@ def send_quickrecipe(ingredients):
 def send_recipe(message):
     user_id = dbhelper.get_uid_with_chat_id(message.chat.id)
     recipes = dbhelper.get_recipes(user_id)
+    print(recipes)
     if recipes == 'norec':
         bot.reply_to(message, '\U0001F645 No recipe found.')
     elif recipes == 'norec_ing':
-        bot.reply_to(message, '\U0001F645 No recipe found.\nPlease add more ingredients.')
+        bot.reply_to(message, '\U0001F645 No recipe found. Please add more ingredients.')
     elif recipes == 'norec_ute':
-        bot.reply_to(message, '\U0001F645 No recipe found.\nPlease add more utensils.')
+        bot.reply_to(message, '\U0001F645 No recipe found. Please add more utensils.')
     elif recipes == 'error':
         bot.reply_to(message, '\U0001F937 Sorry, an unexpected error has occured. Please make sure you have added all the necessary information in /myinfo.')
     else:
