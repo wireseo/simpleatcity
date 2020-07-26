@@ -685,7 +685,7 @@ def upload_recipe(strlst):
 
     except Exception as e:
         print("An exception of type {0} occurred. Arguments:\n{1!r}".format(type(e).__name__, e.args))
-        return "An error occurred."
+        return "An error occurred. Please check your input and try again."
 
 
 # get user db uid from chat_id

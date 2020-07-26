@@ -218,12 +218,12 @@ def send_myinfo(message):
 
         msg = bot.reply_to(message,
             "*Dietary Preference:* \n{}\n\n".format(diet) +
-            "*Items in Fridge:* \n{}\n\n".format(items) +
+            "*Ingredients:* \n{}\n\n".format(items) +
             "*Utensils:* \n{}\n\n".format(utensils) +
             "*Likes:* \n{}\n\n".format(likes) +
             "*Dislikes:* \n{}\n\n".format(dislikes) +
-            "*Favourites:* \n{}\n\n".format(fav) +
-            "*Recipes Uploaded:* \n{}\n\n".format(uploaded) +
+            "*Favourites:* \n{}\n\n\t".format(fav) +
+            "*Recipes Uploaded:* \n{}\n\n\t".format(uploaded) +
             "To access the recipes above, type in the recipe id (i.e. number " +
             "displayed before recipe name). You can only prompt for one recipe at a time.\n\n" +
             "To maintain ingredients, go to /ingredients. To maintain" +
@@ -258,7 +258,7 @@ def send_ingredients(message):
     chat_id = message.chat.id
     items = dbhelper.get_ingredients(chat_id)
 
-    msg = bot.reply_to(message, "*Items in Fridge:* \n{}\n\n".format(items) +
+    msg = bot.reply_to(message, "*Ingredients:* \n{}\n\n".format(items) +
     "To add ingredients, type in a list of ingredients with a '+' in front of it." +
     " Make sure that each is separated with a comma and are in singular form" +
     " either with or without spaces in between (e.g. + avocado, soymilk, lettuce).\n\n" +
@@ -350,7 +350,7 @@ def ask_uten(message):
             if len(strlst) == 2:
                 strlst.append(message.text) # diet index [2]
             all_utensils = dbhelper.get_all_utensils()
-            uten = bot.reply_to(message, "Please enter any necessary utensils for the recipe.\n\n*Available Utensils:* \n\t\t{}\n\nMake sure that each is separated with a comma without spaces in between (e.g. 1,2).".format(all_utensils))
+            uten = bot.reply_to(message, "Please enter any necessary utensils for the recipe.\n\nAvailable Utensils: \n\t\t{}\n\nMake sure that each is separated with a comma with or without spaces in between (e.g. 1, 2).".format(all_utensils))
             bot.register_next_step_handler(uten, ask_main_ing)
         else:
             bot.reply_to(message, "Please check your input and retry.")
@@ -363,13 +363,12 @@ def ask_main_ing(message):
     else:
         print(strlst)
         if len(strlst) == 3:
-            strlst.append(message.text) # "list" of uten index [3]
+            text = message.text.replace(" ", "")
+            strlst.append(text) # "list" of uten index [3]
         main_ing = bot.reply_to(message, inspect.cleandoc("""
-            Please enter the main ingredients of the recipe. They should be absolutely
-integral to the recipe (i.e. recipe cannot be attempted without them).\n
-Make sure that each is separated with a comma and are in singular form
-with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
-If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+            Please enter the main ingredients of the recipe. They should be absolutely integral to the recipe (i.e. recipe cannot be attempted without them).\n
+            Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
+            If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
         bot.register_next_step_handler(main_ing, ask_sub_ing)
 
 def ask_sub_ing(message):
@@ -381,7 +380,8 @@ def ask_sub_ing(message):
             send_accepted_ingredients(message)
         print(strlst)
         text = message.text.lower()
-        ingredlst = text[0:].split(",")
+        text = text.replace(' ', '')
+        ingredlst = text.split(",")
         contin = True
         for ingred in ingredlst:
             id = Cache.ingred_dict.get(ingred)
@@ -395,10 +395,9 @@ def ask_sub_ing(message):
             if len(strlst) == 4:
                 strlst.append(message.text) # "list" of main ing names [4]
             sub_ing = bot.reply_to(message, inspect.cleandoc("""
-                Please enter the sub ingredients of the recipe. They should be ingredients
-    that are not strictly necessary to the recipe (i.e. recipe still can be attempted without them).\n
-    Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
-    If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
+                Please enter the sub ingredients of the recipe. They should be ingredients that are not strictly necessary to the recipe (i.e. recipe still can be attempted without them).\n
+                Make sure that each is separated with a comma and are in singular form with or without spaces in between (e.g. avocado, soymilk, lettuce).\n
+                If the bot does not recognize your input, try inputting a more general version of it (ex. portobello to mushroom) or try searching for it in /acceptedingredients."""))
             bot.register_next_step_handler(sub_ing, ask_instructions)
 
 def ask_instructions(message):
@@ -410,7 +409,8 @@ def ask_instructions(message):
             send_accepted_ingredients(message)
         print(strlst)
         text = message.text.lower()
-        ingredlst = text[0:].split(",")
+        text = text.replace(' ', '')
+        ingredlst = text.split(",")
         contin = True
         for ingred in ingredlst:
             id = Cache.ingred_dict.get(ingred)
@@ -425,9 +425,7 @@ def ask_instructions(message):
             if len(strlst) == 5:
                 strlst.append(message.text) # "list" of sub ing names [5]
             instructions = bot.reply_to(message, inspect.cleandoc("""
-                Please enter instructions for the recipe. You can either paste a link
-to the recipe or type it out in a list format. For the latter, make
-sure you number the steps and outline the process as clearly as possible."""))
+                Please enter instructions for the recipe. You can either paste a link to the recipe or type it out in a list format. For the latter, make sure you number the steps and outline the process as clearly as possible."""))
             bot.register_next_step_handler(instructions, upload_recipe)
 
 def upload_recipe(message):
