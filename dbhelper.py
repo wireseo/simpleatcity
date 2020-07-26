@@ -620,12 +620,12 @@ def add_to_fav(call):
         curs.execute(sql_check)
         duplicate = curs.fetchall()
         if duplicate[0][0] == 1:
-            return '\U0001F645 You have already added "{}" to your favourites'.format(str(Cache.rec_tup_dict[user_id][1]))
+            return '\U0001F645 You have already added "{}" to your favourites.'.format(str(Cache.rec_tup_dict[user_id][1]))
         else:
             sql_fav = "INSERT IGNORE INTO users_fav (user_id, rec_id) VALUES ({}, {})".format(str(user_id), str(Cache.rec_tup_dict[user_id][0]))
             curs.execute(sql_fav)
             db.commit()
-            return '\U0001F44D You have successfully added "{}" to your favourites'.format(str(Cache.rec_tup_dict[user_id][1]))
+            return '\U0001F44D You have successfully added "{}" to your favourites!'.format(str(Cache.rec_tup_dict[user_id][1]))
     except Exception as e:
         print("An exception of type {0} occurred while adding recipe to favourites. Arguments:\n{1!r}".format(type(e).__name__, e.args))
 
