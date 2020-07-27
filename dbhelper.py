@@ -41,7 +41,6 @@ def get_quickrecipes(ing_name_str):
         if len(final_quickrec) == 0:
             return 'norec'
         else:
-            print(str(final_quickrec))
             return list(final_quickrec)
     except Exception as e:
         print("An exception of type {0} occurred while retrieving quickrecipe. Arguments:\n{1!r}".format(type(e).__name__, e.args))
