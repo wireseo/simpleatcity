@@ -494,20 +494,17 @@ def gen_recipe(message):
     user_id = dbhelper.get_uid_with_chat_id(chat_id)
     # get random index
     rand_idx = get_random_index(Cache.rec_list_dict[user_id])
-    # handles the case where there is only one recipe left
-    if rand_idx == -1:
-        Cache.rec_tup_dict[user_id] = Cache.rec_list_dict[user_id][0]
-    else:
-        # cache the selected recipe
-        Cache.rec_tup_dict[user_id] = Cache.rec_list_dict[user_id].pop(rand_idx)
+    # cache the selected recipe
+    Cache.rec_tup_dict[user_id] = Cache.rec_list_dict[user_id].pop(rand_idx)
     recipe_str = format_recipe_str(Cache.rec_tup_dict[user_id])
     bot.send_message(chat_id, recipe_str, parse_mode='Markdown', reply_markup=gen_markup_recipe())
 
 
 # retrieve random element from input list
 def get_random_index(input):
+    # handles the case where there is only one recipe left
     if len(input) == 1:
-        return -1
+        return 0
     else:
         return random.randint(0, len(input) - 1)
 
@@ -528,7 +525,6 @@ def gen_markup_recipe():
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
-    # print(call)
     user_id = dbhelper.get_uid_with_chat_id(call.from_user.id)
     if call.data == "cb_fav":
         bot.answer_callback_query(call.id, "\U00002764 Add to favourites")
