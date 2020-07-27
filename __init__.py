@@ -444,7 +444,7 @@ def upload_recipe(message):
 @bot.message_handler(commands=['quickrecipe'])
 def ask_ingredients(message):
     ingredients = bot.reply_to(message, inspect.cleandoc("""
-        Please enter all the available ingredients and seperate different ingredients with commas. Please refer to /acceptedingredients for a list of all the valid ingredients.
+        Please enter all the available ingredients. Seperate different ingredients with commas and refer to /acceptedingredients for a list of all the valid ingredients.
         ex) avocado, bacon, cauliflower
 
         If you want to quit or access other bot functions, please enter /quit."""))
@@ -513,7 +513,7 @@ def get_random_index(input):
 
 
 def format_recipe_str(input):
-    return 'Would you like to try *"{}"*?\n{}'.format(str(input[1]).lower(), str(input[4]))
+    return 'Would you like to try *"{}"*?\n{}'.format(str(input[1]).lower(), str(input[2]))
 
 
 # build inline keyboard markup for gen_recipe
