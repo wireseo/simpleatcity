@@ -444,7 +444,7 @@ def upload_recipe(message):
 @bot.message_handler(commands=['quickrecipe'])
 def ask_ingredients(message):
     ingredients = bot.reply_to(message, inspect.cleandoc("""
-        Please enter all the available ingredients. Use singular form for ingredients and seperate different ingredients with commas.
+        Please enter all the available ingredients. Use singular form for ingredients and seperate different ingredients with commas. Please refer to /acceptedingredients for a list of all the valid ingredients.
         ex) avocado, bacon, cauliflower
 
         If you want to quit or access other bot functions, please enter /quit."""))
@@ -454,7 +454,9 @@ def ask_ingredients(message):
 # suggest recipes based on given ingredients
 def send_quickrecipe(ingredients):
     if ingredients.text == "/quit":
-        return bot.reply_to(ingredients, '\U0001F926 You have quit the /quickrecipe process.')
+        bot.reply_to(ingredients, '\U0001F926 You have quit the /quickrecipe process.')
+    if message.text == "/acceptedingredients":
+        send_accepted_ingredients(ingredients)
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipes = dbhelper.get_quickrecipes(ingredients.text)
     if recipes == 'norec':
