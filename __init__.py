@@ -513,7 +513,7 @@ def get_random_index(input):
 
 
 def format_recipe_str(input):
-    return 'Would you like to try "{}"?\n{}'.format(str(input[1]).lower(), '*' + str(input[4]) + '*')
+    return 'Would you like to try *"{}"*?\n{}'.format(str(input[1]).lower(), str(input[4]))
 
 
 # build inline keyboard markup for gen_recipe
