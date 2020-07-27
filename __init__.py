@@ -454,9 +454,9 @@ def ask_ingredients(message):
 # suggest recipes based on given ingredients
 def send_quickrecipe(ingredients):
     if ingredients.text == "/quit":
-        bot.reply_to(ingredients, '\U0001F926 You have quit the /quickrecipe process.')
+        return bot.reply_to(ingredients, '\U0001F926 You have quit the /quickrecipe process.')
     if ingredients.text == "/acceptedingredients":
-        send_accepted_ingredients(ingredients)
+        return send_accepted_ingredients(ingredients)
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipes = dbhelper.get_quickrecipes(ingredients.text)
     if recipes == 'norec':
