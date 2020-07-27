@@ -238,8 +238,8 @@ def send_myinfo(message):
 
 # User can change dietary status
 @bot.message_handler(commands=['diet'])
-def send_accepted_ingredients(message):
-    chat_id = message.chat.id
+def send_diet(message):
+    chat_id = message.chat.idsend
     diet = dbhelper.get_diet(chat_id)
     msg = bot.reply_to(message, "*Dietary Preference:* \n{}\n\n".format(diet) +
     "Dietary status can be changed by typing 'veg' (dairy dishes recommended)" +
@@ -455,7 +455,7 @@ def ask_ingredients(message):
 def send_quickrecipe(ingredients):
     if ingredients.text == "/quit":
         bot.reply_to(ingredients, '\U0001F926 You have quit the /quickrecipe process.')
-    if message.text == "/acceptedingredients":
+    if ingredients.text == "/acceptedingredients":
         send_accepted_ingredients(ingredients)
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipes = dbhelper.get_quickrecipes(ingredients.text)
