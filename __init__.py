@@ -444,7 +444,7 @@ def upload_recipe(message):
 @bot.message_handler(commands=['quickrecipe'])
 def ask_ingredients(message):
     ingredients = bot.reply_to(message, inspect.cleandoc("""
-        Please enter all the available ingredients. Use singular form for ingredients and seperate different ingredients with commas. Please refer to /acceptedingredients for a list of all the valid ingredients.
+        Please enter all the available ingredients and seperate different ingredients with commas. Please refer to /acceptedingredients for a list of all the valid ingredients.
         ex) avocado, bacon, cauliflower
 
         If you want to quit or access other bot functions, please enter /quit."""))
@@ -460,9 +460,9 @@ def send_quickrecipe(ingredients):
     user_id = dbhelper.get_uid_with_chat_id(ingredients.chat.id)
     recipes = dbhelper.get_quickrecipes(ingredients.text)
     if recipes == 'norec':
-        bot.reply_to(ingredients, '\U0001F645 No recipe found. Please add more /ingredients.')
+        bot.reply_to(ingredients, '\U0001F645 No recipe found based on your ingredients.')
     elif recipes == 'error':
-        bot.reply_to(ingredients, '\U0001F937 Sorry, an unexpected error has occured. Please refer to /acceptedingredients for a list of all the valid ingredients.')
+        bot.reply_to(ingredients, '\U0001F937 Sorry, one or some of the given ingredients are not valid. Please refer to /acceptedingredients for a list of all the valid ingredients.')
     else:
         # cache the list of filtered recipes
         Cache.rec_list_dict[user_id] = recipes
@@ -513,7 +513,7 @@ def get_random_index(input):
 
 
 def format_recipe_str(input):
-    return 'Would you like to try "{}"?\n*{}*'.format(str(input[1]).lower(), str(input[4]))
+    return 'Would you like to try "{}"?\n{}'.format(str(input[1]).lower(), '*' + str(input[4]) + '*')
 
 
 # build inline keyboard markup for gen_recipe
@@ -538,6 +538,7 @@ def callback_query(call):
             bot.answer_callback_query(call.id, "\U0001F645 There is no other recipe.")
         else:
             bot.answer_callback_query(call.id, "\U0001F500 Show another recipe")
+            bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
             gen_recipe(call.message)
     elif call.data == "cb_cancel":
         bot.answer_callback_query(call.id, "\U0000274C Cancel")
