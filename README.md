@@ -1,4 +1,1 @@
-Simpleatcity
-Telegram Bot for Simple Recipes!
-yay
-way to go bud
+Simpleatcity, the go-to telegram bot for hassle-free recipe suggestion 🍽
